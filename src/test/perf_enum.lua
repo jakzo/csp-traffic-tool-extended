@@ -18,14 +18,14 @@ local Enum = {
 -- ]]
 -- local Enum = ffi.new("struct whatever")
 
-return function ()
+return function()
   collectgarbage()
   math.randomseed(0)
   ac.perfBegin(0)
   local t = 0
   for i = 1, 1000000 do
     t = t + Enum.Key2
-  end  
+  end
   ac.debug('t', t)
   ac.perfEnd(0)
   generic_utils.runGC()

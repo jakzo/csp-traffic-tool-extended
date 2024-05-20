@@ -13,11 +13,11 @@ local TrafficArea = class('TrafficArea')
 function TrafficArea:initialize(def)
   self.id = def.id
   self.name = def.name
-  self.shapes = Array(def.shapes, function (shape)
-    return FlatPolyShape(shape[1][2], 10, shape, function (t) return vec2(t[1], t[3]) end)
+  self.shapes = Array(def.shapes, function(shape)
+    return FlatPolyShape(shape[1][2], 10, shape, function(t) return vec2(t[1], t[3]) end)
   end)
   self.params = def.params
-  self.aabb = AABB.fromArray(self.shapes, function (shape) return shape.aabb end)
+  self.aabb = AABB.fromArray(self.shapes, function(shape) return shape.aabb end)
 end
 
 ---@param lane TrafficLane
@@ -36,9 +36,11 @@ function TrafficArea:process(lane)
   if not self.aabb:horizontallyInsersects(lane.aabb) then return end
 
   for i = 1, lane.size do
-    if self.shapes:some(function (
-      shape ---@type FlatPolyShape
-    ) return shape:contains(lane.points[i]) end) then
+    if self.shapes:some(function(
+            shape ---@type FlatPolyShape
+        )
+          return shape:contains(lane.points[i])
+        end) then
       extendMeta(lane, lane.edgesMeta[i], self.params)
     end
   end

@@ -11,7 +11,7 @@ local BezierCurveNormalized = class('BezierCurveNormalized', class.Pool)
 
 local _curve = BezierCurve(vec3(), vec3(), vec3(), vec3())
 local _points = Array.range(samples + 1, function() return { pos = vec3(), length = 0 } end)
-local _fnFindPoint = function (v, _, j) return j < v.length end
+local _fnFindPoint = function(v, _, j) return j < v.length end
 
 ---Copies values of vectors to its own points, so feel free to pass references.
 ---@param posFrom vec3 @Could be a reference.
@@ -57,7 +57,7 @@ function BezierCurveNormalized:initialize(posFrom, dirFrom, posTo, dirTo, lenFro
 
     local p1 = points[x]
     local p2 = points[x + 1]
-    if p1 == nil or p2 == nil then 
+    if p1 == nil or p2 == nil then
       ac.debug('Broken bezier: posFrom', posFrom)
       ac.debug('Broken bezier: dirFrom', dirFrom)
       ac.debug('Broken bezier: posTo', posTo)

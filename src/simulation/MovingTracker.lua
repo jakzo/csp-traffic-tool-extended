@@ -48,7 +48,7 @@ end
 
 function MovingTracker:findNearest(pos, distanceCallback, distanceCallbackData)
   local from, to = self._space:rawPointers(pos)
-  local retDistance, retItem = 1/0, nil
+  local retDistance, retItem = 1 / 0, nil
   local items = self._items
   while from ~= to do
     local item = items[from[0]]

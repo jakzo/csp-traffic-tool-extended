@@ -18,7 +18,7 @@ local minItemHeight = vec2(10, 98)
 ---@param filename string
 local function loadFromOBJ(self, filename)
   local vertices = {}
-  local nextName = nil  
+  local nextName = nil
   local lines = self.editor.lanesList
   lines:clear()
 
@@ -30,10 +30,10 @@ local function loadFromOBJ(self, filename)
     elseif b == 111 then -- o
       nextName = line:sub(3):trim()
     elseif b == 108 then -- l
-      local points = table.map({ line:numbers() }, function (i, _, data) return data[i] end, vertices)
+      local points = table.map({ line:numbers() }, function(i, _, data) return data[i] end, vertices)
       if #points > 1 then
-        lines:push(EditorLane{
-          points = points, 
+        lines:push(EditorLane {
+          points = points,
           name = nextName or error('No next name found')
         })
       end
@@ -48,14 +48,14 @@ function EditorTabLanes:doUI()
   if ui.button('Replace lines with OBJ file', vec2(ui.availableSpaceX(), 0)) then
     os.openFileDialog({
       title = 'Open',
-      defaultFolder = ac.getFolder(ac.FolderID.ContentTracks)..'/'..ac.getTrackID(),
+      defaultFolder = ac.getFolder(ac.FolderID.ContentTracks) .. '/' .. ac.getTrackID(),
       fileTypes = {
         {
           name = 'OBJ Models',
           mask = '*.obj'
         }
       },
-    }, function (err, filename)
+    }, function(err, filename)
       if not err and filename then
         loadFromOBJ(self, filename)
       end
@@ -64,7 +64,7 @@ function EditorTabLanes:doUI()
   ui.offsetCursorY(12)
 
   ui.header('Created lanes')
-  ui.childWindow('##lanesList', vec2(0, -50), function ()
+  ui.childWindow('##lanesList', vec2(0, -50), function()
     local lanesList = self.editor.lanesList
     local lanesLen = #lanesList
     if lanesLen == 0 then
@@ -94,7 +94,7 @@ function EditorTabLanes:doUI()
       lanesList:removeAt(toRemoveIndex)
       self.editor:onChange()
 
-      ui.toast(ui.Icons.Delete, 'Traffic lane “'..toRemove.name..'” removed', function ()
+      ui.toast(ui.Icons.Delete, 'Traffic lane “' .. toRemove.name .. '” removed', function()
         lanesList:insert(math.min(toRemoveIndex, #lanesList + 1), toRemove)
         self.editor:onChange()
       end)
@@ -114,9 +114,9 @@ function EditorTabLanes:laneItem(lane)
     ui.offsetCursorY(minItemHeight.y)
     return
   end
-  
+
   local c = ui.getCursorY()
-  
+
   local toRemove = false
   ui.pushID(lane.uniqueID)
   if ui.checkbox('##' .. lane.name, lane == self.editor.selectedLane) then
@@ -130,7 +130,7 @@ function EditorTabLanes:laneItem(lane)
   end
   ui.sameLine(ui.availableSpaceX() - 32)
   ui.button('…', vec2(32, 0))
-  ui.itemPopup('cfg', ui.MouseButton.Left, function ()
+  ui.itemPopup('cfg', ui.MouseButton.Left, function()
     if ui.checkbox("Loop", lane.loop) then
       lane.loop, _c = not lane.loop, true
     end
@@ -146,13 +146,13 @@ function EditorTabLanes:laneItem(lane)
   ui.offsetCursorX(30)
   ui.setNextItemWidth(120)
   local r = self.editor.rules.laneRoles[lane.role or 1]
-  ui.combo('##role', string.format('Role: %s', r and r.name or tostring(lane.role or 1)), ui.ComboFlags.None, function ()
+  ui.combo('##role', string.format('Role: %s', r and r.name or tostring(lane.role or 1)), ui.ComboFlags.None, function()
     for i, v in ipairs(self.editor.rules.laneRoles) do
       if ui.selectable(v.name, v == r) then
         lane.role, _c = i, true
       end
       if ui.itemHovered() then
-        ui.setTooltip('Priority: '..tostring(v.priority))
+        ui.setTooltip('Priority: ' .. tostring(v.priority))
       end
     end
   end)
@@ -177,7 +177,7 @@ function EditorTabLanes:laneItem(lane)
   if ui.itemHovered() then
     ui.setTooltip('Allow changes to nearby lanes running in similar direction')
   end
-  
+
   ui.offsetCursorX(30)
   ui.text(string.format('Length: %.1f m, points: %d%s', lane.length, #lane.points, lane.loop and ', loop' or ''))
 
@@ -185,7 +185,7 @@ function EditorTabLanes:laneItem(lane)
   ui.popID()
   ui.offsetCursorY(8)
 
-  if _c then    
+  if _c then
     lane:recalculate()
     self.editor.onChange()
   end

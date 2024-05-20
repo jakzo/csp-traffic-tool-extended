@@ -25,11 +25,14 @@ function EditorConnection.allocate(int, lane, point, pos2, side, isExit)
   local edgePos = calculatePos(lane, pos2, point)
   local offset = int:getEntryOffset(lane, isExit)
   local priorityOffset = int:getEntryPriorityOffset(lane)
-  return { lane = lane, distance = lane:cubicCurve():pointEdgePosToDistance(point, edgePos), side = side, offset = offset, priorityOffset = priorityOffset }
+  return { lane = lane, distance = lane:cubicCurve():pointEdgePosToDistance(point, edgePos), side = side, offset = offset, priorityOffset =
+  priorityOffset }
 end
+
 function EditorConnection:initialize()
   self:updateOffset()
 end
+
 function EditorConnection:updateOffset()
   self.pos = self.lane:cubicCurve():interpolateDistance(self.distance + self.offset)
   self.dir = self.lane:cubicCurve():interpolateDistance(self.distance + self.offset + 0.01):sub(self.pos):normalize()
@@ -53,38 +56,45 @@ function EditorEditConnections:initialize(editor, int)
   self.editor = editor
   self.intersection = int
 
-  self.shape = FlatPolyShape(int.points[1].y, 5, int.points, function (t) return vec2(t.x, t.z) end)
+  self.shape = FlatPolyShape(int.points[1].y, 5, int.points, function(t) return vec2(t.x, t.z) end)
   self.enters = Array()
   self.exits = Array()
 
   self.editor.lanesList:forEach(
-    ---@param lane EditorLane
-    function (lane)
-    self.shape:collectIntersections(lane.points, lane.loop, function (indexFrom, posFrom, sideFrom, indexTo, posTo, sideTo)
-      local fromEdgePos = calculatePos(lane, posFrom, indexFrom)
-      local fromDistance = lane:cubicCurve().edgesCubic[indexFrom].totalDistance + lane:cubicCurve().edgesCubic[indexFrom].edgeLength * fromEdgePos
-      if fromDistance > 0.1 then
-        self.enters:push(EditorConnection(int, lane, indexFrom, posFrom, sideFrom, false))
-      end
+  ---@param lane EditorLane
+    function(lane)
+      self.shape:collectIntersections(lane.points, lane.loop,
+        function(indexFrom, posFrom, sideFrom, indexTo, posTo, sideTo)
+          local fromEdgePos = calculatePos(lane, posFrom, indexFrom)
+          local fromDistance = lane:cubicCurve().edgesCubic[indexFrom].totalDistance +
+          lane:cubicCurve().edgesCubic[indexFrom].edgeLength * fromEdgePos
+          if fromDistance > 0.1 then
+            self.enters:push(EditorConnection(int, lane, indexFrom, posFrom, sideFrom, false))
+          end
 
-      local toEdgePos = calculatePos(lane, posTo, indexTo)
-      local toDistance = lane:cubicCurve().edgesCubic[indexTo].totalDistance + lane:cubicCurve().edgesCubic[indexTo].edgeLength * toEdgePos
-      if toDistance < lane:cubicCurve().totalDistance - 0.1 then
-        self.exits:push(EditorConnection(int, lane, indexTo, posTo, sideTo, true))
-      end
+          local toEdgePos = calculatePos(lane, posTo, indexTo)
+          local toDistance = lane:cubicCurve().edgesCubic[indexTo].totalDistance +
+          lane:cubicCurve().edgesCubic[indexTo].edgeLength * toEdgePos
+          if toDistance < lane:cubicCurve().totalDistance - 0.1 then
+            self.exits:push(EditorConnection(int, lane, indexTo, posTo, sideTo, true))
+          end
+        end)
     end)
+
+  ---@param i1 EditorConnection
+  ---@param i2 EditorConnection
+  self.enters:sort(function(i1, i2)
+    return i1.side < i2.side or
+    i1.side == i2.side and
+    i1.pos:distanceSquared(self.shape.aabb.center) > i2.pos:distanceSquared(self.shape.aabb.center)
   end)
 
   ---@param i1 EditorConnection
   ---@param i2 EditorConnection
-  self.enters:sort(function (i1, i2)
-    return i1.side < i2.side or i1.side == i2.side and i1.pos:distanceSquared(self.shape.aabb.center) > i2.pos:distanceSquared(self.shape.aabb.center)
-  end)
-
-  ---@param i1 EditorConnection
-  ---@param i2 EditorConnection
-  self.exits:sort(function (i1, i2) 
-    return i1.side < i2.side or i1.side == i2.side and i1.pos:distanceSquared(self.shape.aabb.center) > i2.pos:distanceSquared(self.shape.aabb.center)
+  self.exits:sort(function(i1, i2)
+    return i1.side < i2.side or
+    i1.side == i2.side and
+    i1.pos:distanceSquared(self.shape.aabb.center) > i2.pos:distanceSquared(self.shape.aabb.center)
   end)
 
   self.draw3D = self.draw3D:bind(self)
@@ -99,15 +109,15 @@ function EditorEditConnections:trajectoriesGrid()
   ui.setCursor(c)
   ui.beginRotation()
   ui.pushStyleColor(ui.StyleColor.Text, rgbm(1, 0, 0, 1))
-  self.exits:forEach(function (item)
+  self.exits:forEach(function(item)
     ui.textAligned(item.lane.name, vec2(0, 0), vec2(60, 0))
   end)
   ui.popStyleColor()
   ui.endPivotRotation(180, c + vec2(74, -4))
-  
+
   ui.setCursor(c + vec2(0, 80))
   ui.pushStyleColor(ui.StyleColor.Text, rgbm(0, 1, 0, 1))
-  self.enters:forEach(function (item)
+  self.enters:forEach(function(item)
     ui.textAligned(item.lane.name, vec2(1, 0), vec2(60, 0))
   end)
   ui.popStyleColor()
@@ -115,48 +125,54 @@ function EditorEditConnections:trajectoriesGrid()
   ui.pushStyleColor(ui.StyleColor.Button, rgbm(0.4, 0.4, 0.4, 1))
   local hEnter, hExit = nil, nil
   self.enters:forEach(
-    ---@param enter EditorConnection
-    function (enter, i)
-    ui.setCursor(c + vec2(76, 61 + 18 * i))
-    self.exits:forEach(      
-    ---@param exit EditorConnection
-      function (exit)
-      local selected = self.sEnter == enter and self.sExit == exit
-      local allowed = self.intersection:isTrajectoryAllowed(enter.lane, exit.lane)
-      if not allowed then ui.pushStyleColor(ui.StyleColor.Button, rgbm(0.4, 0.2, 0.2, 1)) 
-      elseif self.hEnterRow == enter then ui.pushStyleColor(ui.StyleColor.Button, rgbm(0.4, 0.5, 0.4, 1))
-      elseif self.hExitRow == exit then ui.pushStyleColor(ui.StyleColor.Button, rgbm(0.5, 0.4, 0.4, 1)) end
-      ui.button(' ', vec2(17, 17), selected and ui.ButtonFlags.Active or 0)
+  ---@param enter EditorConnection
+    function(enter, i)
+      ui.setCursor(c + vec2(76, 61 + 18 * i))
+      self.exits:forEach(
+      ---@param exit EditorConnection
+        function(exit)
+          local selected = self.sEnter == enter and self.sExit == exit
+          local allowed = self.intersection:isTrajectoryAllowed(enter.lane, exit.lane)
+          if not allowed then
+            ui.pushStyleColor(ui.StyleColor.Button, rgbm(0.4, 0.2, 0.2, 1))
+          elseif self.hEnterRow == enter then
+            ui.pushStyleColor(ui.StyleColor.Button, rgbm(0.4, 0.5, 0.4, 1))
+          elseif self.hExitRow == exit then
+            ui.pushStyleColor(ui.StyleColor.Button, rgbm(0.5, 0.4, 0.4, 1))
+          end
+          ui.button(' ', vec2(17, 17), selected and ui.ButtonFlags.Active or 0)
 
-      if not allowed or self.hEnterRow == enter or self.hExitRow == exit then ui.popStyleColor() end
-      if ui.itemHovered() then
-        hEnter, hExit = enter, exit
-        if ui.mouseClicked(1) then
-          self.intersection:setTrajectoryAllowed(enter.lane, exit.lane, not allowed)
-          self.editor.onChange()
-        end
-      end
-      ui.sameLine(0, 1)
+          if not allowed or self.hEnterRow == enter or self.hExitRow == exit then ui.popStyleColor() end
+          if ui.itemHovered() then
+            hEnter, hExit = enter, exit
+            if ui.mouseClicked(1) then
+              self.intersection:setTrajectoryAllowed(enter.lane, exit.lane, not allowed)
+              self.editor.onChange()
+            end
+          end
+          ui.sameLine(0, 1)
 
-      local attributes = self.intersection:getTrajectoryAttributes(enter.lane, exit.lane)
-      local laneRolePo = self.editor.rules.laneRoles[enter.lane.role] and self.editor.rules.laneRoles[enter.lane.role].priority or 0
-      local laneBasePo = enter.lane.priorityOffset
-      local lanePo = self.intersection:getEntryPriorityOffset(enter.lane)
-      local finalPo = laneRolePo + laneBasePo + lanePo + (attributes and attributes.po or 0)
-      if ui.itemHovered() then
-        ui.setTooltip(string.format('Role priority: %.0f\nLane offset: %.0f\nEntry offset: %.0f\nTrajectory offset: %.0f', 
-          laneRolePo, laneBasePo, lanePo, attributes and attributes.po or 0))
-      end
-      if finalPo ~= 0 then
-        local c = ui.getCursor()
-        ui.offsetCursor(vec2(-20, -3))
-        ui.beginScale()
-        ui.textAligned(string.format('%.0f', finalPo), 0.5, 21)
-        ui.endScale(0.8)
-        ui.setCursor(c)
-      end
+          local attributes = self.intersection:getTrajectoryAttributes(enter.lane, exit.lane)
+          local laneRolePo = self.editor.rules.laneRoles[enter.lane.role] and
+          self.editor.rules.laneRoles[enter.lane.role].priority or 0
+          local laneBasePo = enter.lane.priorityOffset
+          local lanePo = self.intersection:getEntryPriorityOffset(enter.lane)
+          local finalPo = laneRolePo + laneBasePo + lanePo + (attributes and attributes.po or 0)
+          if ui.itemHovered() then
+            ui.setTooltip(string.format(
+              'Role priority: %.0f\nLane offset: %.0f\nEntry offset: %.0f\nTrajectory offset: %.0f',
+              laneRolePo, laneBasePo, lanePo, attributes and attributes.po or 0))
+          end
+          if finalPo ~= 0 then
+            local c = ui.getCursor()
+            ui.offsetCursor(vec2(-20, -3))
+            ui.beginScale()
+            ui.textAligned(string.format('%.0f', finalPo), 0.5, 21)
+            ui.endScale(0.8)
+            ui.setCursor(c)
+          end
+        end)
     end)
-  end)
   ui.popStyleColor()
 
   self.hEnter, self.hExit = hEnter, hExit
@@ -169,11 +185,11 @@ function EditorEditConnections:trajectoriesGrid()
   end
 
   self.hEnterRow, self.hExitRow = nil, nil
-  self.enters:forEach(function (enter, i)
-    if ui.rectHovered(c + vec2(-10, (61) + 18 * i), c + vec2(76, (61+18) + 18 * i)) then
+  self.enters:forEach(function(enter, i)
+    if ui.rectHovered(c + vec2(-10, (61) + 18 * i), c + vec2(76, (61 + 18) + 18 * i)) then
       self.hEnterRow = enter
       if ui.mouseClicked(1) then
-        self.exits:forEach(function (exit)
+        self.exits:forEach(function(exit)
           local allowed = self.intersection:isTrajectoryAllowed(enter.lane, exit.lane)
           self.intersection:setTrajectoryAllowed(enter.lane, exit.lane, not allowed)
         end)
@@ -181,11 +197,11 @@ function EditorEditConnections:trajectoriesGrid()
       end
     end
   end)
-  self.exits:forEach(function (exit, i)
-    if ui.rectHovered(c + vec2(57 + 18 * i, -10), c + vec2((57+18) + 18 * i, 76)) then
+  self.exits:forEach(function(exit, i)
+    if ui.rectHovered(c + vec2(57 + 18 * i, -10), c + vec2((57 + 18) + 18 * i, 76)) then
       self.hExitRow = exit
       if ui.mouseClicked(1) then
-        self.enters:forEach(function (enter)
+        self.enters:forEach(function(enter)
           local allowed = self.intersection:isTrajectoryAllowed(enter.lane, exit.lane)
           self.intersection:setTrajectoryAllowed(enter.lane, exit.lane, not allowed)
         end)
@@ -198,9 +214,7 @@ function EditorEditConnections:trajectoriesGrid()
   ui.pushFont(ui.Font.Small)
 
   if self.sEnter ~= nil then
-
     self:trajectoryAttributes(self.sEnter, self.sExit)
-
   else
     ui.textWrapped('Hover square or column/row and click right mouse button to quickly toggle the trajectory.')
   end
@@ -271,7 +285,7 @@ function EditorEditConnections:entryParams()
   ui.offsetCursorY(12)
   ui.header('Entry priority offsets')
   ui.pushID(1)
-  self.enters:forEach(function (enter, i)
+  self.enters:forEach(function(enter, i)
     ui.pushID(i)
     ui.textAligned(enter.lane.name, vec2(), vec2(80, 0))
     ui.sameLine()
@@ -286,7 +300,8 @@ function EditorEditConnections:entryParams()
     ui.popID()
   end)
   ui.popID()
-  ui.textWrapped('Resulting trajectory priority: lane type priority + region priority offset + entry priority offset + trajectory priority offset')
+  ui.textWrapped(
+  'Resulting trajectory priority: lane type priority + region priority offset + entry priority offset + trajectory priority offset')
 
   ui.offsetCursorY(12)
   ui.header('Entry offsets')
@@ -300,21 +315,19 @@ function EditorEditConnections:entryParams()
   self.exits:forEach(entryOffset:bind(true))
   ui.popID()
   ui.popFont()
-
 end
-
 
 local _emissiveModes = {
   {
     name = 'Separate emissives',
     ---@param program EditorTrafficLightProgramDefinition
     ---@param params SerializedTrafficLightEmissiveParams
-    editor = function (program, params, switchToNext)
+    editor = function(program, params, switchToNext)
       local changed = false
       for i, v in ipairs(program.emissives) do
         ui.offsetCursorX(30)
         ui.pushID(i)
-        ui.textColored(v.name..':', v.color)
+        ui.textColored(v.name .. ':', v.color)
         ui.offsetCursorX(30)
         if not params.roles[i] then params.roles[i] = {} end
         local role = params.roles[i]
@@ -330,7 +343,7 @@ local _emissiveModes = {
     name = 'Virtual meshes',
     ---@param program EditorTrafficLightProgramDefinition
     ---@param params SerializedTrafficLightEmissiveParams
-    editor = function (program, params, switchToNext)
+    editor = function(program, params, switchToNext)
       local changed, c = false, nil
       if not params.hide then params.hide = {} end
       ui.offsetCursorX(30)
@@ -363,7 +376,7 @@ local _emissiveModes = {
 ---@return boolean
 local function _emissiveParams(program, params, switchToNext)
   local changed = false
-  ui.combo('##mode', 'Mode: '.._emissiveModes[params.mode or 1].name, ui.ComboFlags.None, function ()
+  ui.combo('##mode', 'Mode: ' .. _emissiveModes[params.mode or 1].name, ui.ComboFlags.None, function()
     for i, v in ipairs(_emissiveModes) do
       if ui.selectable(v.name, i == (params.mode or 1)) then
         params.mode = i
@@ -375,8 +388,8 @@ local function _emissiveParams(program, params, switchToNext)
   if not params.roles then params.roles = {} end
 
   if not _emissiveModes[params.mode or 1] then
-    ui.text('Unknown mode: '..tostring(params.mode))
-  else 
+    ui.text('Unknown mode: ' .. tostring(params.mode))
+  else
     local c
     c, switchToNext = _emissiveModes[params.mode or 1].editor(program, params, switchToNext)
     if c then changed = true end
@@ -393,7 +406,7 @@ function EditorEditConnections:trafficLight()
   ui.sameLine()
   ui.offsetCursorY(-3)
   ui.setNextItemWidth(ui.availableSpaceX())
-  ui.combo('##program', self.intersection.trafficLightProgram or 'None', function ()
+  ui.combo('##program', self.intersection.trafficLightProgram or 'None', function()
     local inter = self.intersection
     if ui.selectable('None', inter.trafficLightProgram == 'None', ui.SelectableFlags.None) then
       inter.trafficLightProgram, changed = nil, true
@@ -408,7 +421,7 @@ function EditorEditConnections:trafficLight()
   end)
 
   if self.intersection.trafficLightProgram ~= nil then
-    local selectedProgram = table.findFirst(EditorTrafficLightPrograms, function (item)
+    local selectedProgram = table.findFirst(EditorTrafficLightPrograms, function(item)
       return item.name == self.intersection.trafficLightProgram
     end)
     if selectedProgram then
@@ -427,7 +440,7 @@ function EditorEditConnections:trafficLight()
         local inter = self.intersection
         local switchToNext = false
         for i = 1, #inter.points do
-          ui.text('Side '..tostring(i)..':')
+          ui.text('Side ' .. tostring(i) .. ':')
           ui.pushID(i)
           local emissiveParams = self.intersection.trafficLightEmissive[i]
           if not emissiveParams then
@@ -442,7 +455,6 @@ function EditorEditConnections:trafficLight()
           ui.popID()
           ui.offsetCursorY(12)
         end
-
       end
 
       ui.popItemWidth()
@@ -451,13 +463,12 @@ function EditorEditConnections:trafficLight()
     end
   end
 
-  if changed then    
+  if changed then
     self.intersection:recalculate()
     self.editor.onChange()
   end
 
   ui.popFont()
-
 end
 
 function EditorEditConnections:__call()
@@ -471,21 +482,21 @@ function EditorEditConnections:__call()
   ui.sameLine()
   ui.header(self.intersection.name)
 
-  ui.tabBar('tabs', function ()
-    ui.tabItem('Trajectories grid', function ()
-      ui.childWindow('scrolling', function ()
+  ui.tabBar('tabs', function()
+    ui.tabItem('Trajectories grid', function()
+      ui.childWindow('scrolling', function()
         self._curTab = 'grid'
         self:trajectoriesGrid()
       end)
     end)
-    ui.tabItem('Entry params', function ()
-      ui.childWindow('scrolling', function ()
+    ui.tabItem('Entry params', function()
+      ui.childWindow('scrolling', function()
         self._curTab = 'entryParams'
         self:entryParams()
       end)
     end)
-    ui.tabItem('Traffic light', function ()
-      ui.childWindow('scrolling', function ()
+    ui.tabItem('Traffic light', function()
+      ui.childWindow('scrolling', function()
         self._curTab = 'trafficLight'
         self:trafficLight()
       end)
@@ -516,12 +527,12 @@ function EditorEditConnections:draw3D()
   if self.hEnter ~= nil then
     self:drawTrajectory(self.hEnter, self.hExit, rgbm(0, 0, 0, 1))
   elseif self.hEnterRow ~= nil then
-    self.exits:forEach(function (exit)
+    self.exits:forEach(function(exit)
       local allowed = self.intersection:isTrajectoryAllowed(self.hEnterRow.lane, exit.lane)
       self:drawTrajectory(self.hEnterRow, exit, rgbm(allowed and 0 or 3, allowed and 3 or 0, 0, 1))
     end)
   elseif self.hExitRow ~= nil then
-    self.enters:forEach(function (enter)
+    self.enters:forEach(function(enter)
       local allowed = self.intersection:isTrajectoryAllowed(enter.lane, self.hExitRow.lane)
       self:drawTrajectory(enter, self.hExitRow, rgbm(allowed and 0 or 3, allowed and 3 or 0, 0, 1))
     end)
@@ -549,7 +560,8 @@ function EditorEditConnections:draw3D()
   local int = self.intersection
   for i = 1, #int.points do
     render.debugLine(int.points[i], int.points[i % #int.points + 1], rgbm(3, 3, 0, 1))
-    render.debugText((int.points[i] + int.points[i % #int.points + 1]) / 2, string.format('Side %d', i), rgbm(3, 2, 1, 3), 2)
+    render.debugText((int.points[i] + int.points[i % #int.points + 1]) / 2, string.format('Side %d', i), rgbm(3, 2, 1, 3),
+      2)
   end
 
   return true

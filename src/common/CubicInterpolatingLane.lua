@@ -9,7 +9,7 @@ local function getTangent(points, distances, loop, point, size)
   end
 
   return (points[point % size + 1] - points[point == 1 and size or point - 1])
-    / math.max(0.00001, distances[point > size and 1 or point] + distances[point == 1 and size or point - 1])
+      / math.max(0.00001, distances[point > size and 1 or point] + distances[point == 1 and size or point - 1])
 end
 
 ---@class CubicInterpolatingLane : ClassBase
@@ -48,17 +48,17 @@ function CubicInterpolatingLane:initialize(points, loop, pointsPrepared)
 
   self.loop = loop
   if count < (self.loop and 3 or 2) then
-    error('Too few points: '..tostring(#self.points))
+    error('Too few points: ' .. tostring(#self.points))
     return
   end
 
-  Array.range(count, nil, nil, function (i)
+  Array.range(count, nil, nil, function(i)
     if i == count and not loop then return self.points[i - 1]:distance(self.points[i]) end
     return self.points[i % count + 1]:distance(self.points[i])
   end, nil, self.edgesLength)
 
   local totalDistance = 0
-  Array.range(count, nil, nil, function (i)
+  Array.range(count, nil, nil, function(i)
     local len = self.edgesLength[i]
     local ret = {
       totalDistance = totalDistance,
@@ -98,7 +98,7 @@ function CubicInterpolatingLane:interpolateInto(v, point, edgePos, estimate)
 
   local cur = self.points[point]
   if not cur then
-    error('Invalid point value: '..tostring(point))
+    error('Invalid point value: ' .. tostring(point))
   end
   local fol = point == size and not self.loop and cur or self.points[point % size + 1]
   if estimate or size < 4 then
@@ -145,7 +145,7 @@ end
 
 ---@param distance number
 function CubicInterpolatingLane:findClosestPoint(distance)
-  return self.edgesCubic:findLeftOfIndex(function (meta) return meta.totalDistance > distance end)
+  return self.edgesCubic:findLeftOfIndex(function(meta) return meta.totalDistance > distance end)
 end
 
 ---@param distance number

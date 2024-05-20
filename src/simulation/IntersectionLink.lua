@@ -40,16 +40,16 @@ IntersectionLink.StateRed = -2
 function IntersectionLink.allocate(intersection, lane, from, to, fromPos, toPos, fromSide, toSide, fromOrigPos, toOrigPos)
   local fromFits = lane.loop or from > 0.1
   local toFits = lane.loop or to < lane.totalDistance - 0.1
-  if fromPos and math.isNaN(fromPos.x) or toPos and math.isNaN(toPos.x) then 
-    ac.error('NaN in IntersectionLink: '..tostring(lane)..'; '..tostring(intersection))
+  if fromPos and math.isNaN(fromPos.x) or toPos and math.isNaN(toPos.x) then
+    ac.error('NaN in IntersectionLink: ' .. tostring(lane) .. '; ' .. tostring(intersection))
   end
   return {
     intersection = intersection,
     lane = lane,
     from = from,
     to = to,
-    fromPos = fromFits and fromPos or nil,  -- can be nil for intersections at which lane begins
-    toPos = toFits and toPos or nil,      -- can be nil for intersections at which lane ends
+    fromPos = fromFits and fromPos or nil, -- can be nil for intersections at which lane begins
+    toPos = toFits and toPos or nil,       -- can be nil for intersections at which lane ends
     fromDir = fromFits and lane:getDirection(from) or nil,
     toDir = toFits and lane:getDirection(to) or nil,
     fromSide = fromFits and fromSide or nil,

@@ -28,12 +28,12 @@ end
 local dirty = false
 local raceCar = RaceCarTracker(0)
 
-try(function ()  
+try(function()
   local s = json.decode(ac.load('dbc'))
-  table.forEach(p, function (v, i)
+  table.forEach(p, function(v, i)
     v.v:set(s[i][1], s[i][2], s[i][3])
   end)
-end, function (err)
+end, function(err)
   ac.debug('Error', err)
 end)
 
@@ -50,13 +50,13 @@ function script.draw3D()
   -- render.debugText((p[1].v + p[2].v) / 2, car1:freeDistanceTo(raceCar), rgbm(3, 3, 0, 1))
   -- render.debugText((p[3].v + p[4].v) / 2, car2:freeDistanceTo(car1), rgbm(3, 3, 0, 1))
 
-  table.forEach(DebugShapes, function (item, key)
+  table.forEach(DebugShapes, function(item, key)
     render.debugCross(item, 0.5, rgbm(3, 0, 0, 1))
     render.debugText(item, key, rgbm(3, 0, 0, 1))
   end)
 
   local anyMoved = false
-  table.forEach(p, function (item, i)
+  table.forEach(p, function(item, i)
     -- if i > 2 or i == 1 then return end
     if item.m:render(item.v) then
       dirty = true
@@ -68,7 +68,7 @@ function script.draw3D()
   end)
 
   if dirty and not anyMoved then
-    ac.store('dbc', json.encode(table.map(p, function (item)
+    ac.store('dbc', json.encode(table.map(p, function(item)
       return { item.v.x, item.v.y, item.v.z }
     end)))
   end
@@ -76,7 +76,7 @@ function script.draw3D()
   -- local d = 0
   -- ac.perfBegin('d')
   -- for i = 1, 100000 do
-  --   if i % 2 == 0 then 
+  --   if i % 2 == 0 then
   --     d = d + car1:freeDistanceTo(car2)
   --   else
   --     d = d + car2:freeDistanceTo(car1)

@@ -18,7 +18,7 @@ local meta = {
 }
 
 return function(meshes, colorActive, colorInactive, lag, initialValue)
-  return setmetatable({ 
+  return setmetatable({
     meshes = meshes,
     colorActive = colorActive,
     colorInactive = colorInactive,

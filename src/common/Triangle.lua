@@ -2,7 +2,7 @@
 ---@field a vec2
 ---@field b vec2
 ---@field c vec2
-local Triangle = class('Triangle', function (a, b, c)
+local Triangle = class('Triangle', function(a, b, c)
   return { a = a, b = b, c = c }
 end, class.NoInitialize)
 

@@ -10,7 +10,7 @@ end
 ---@param v3 vec2
 ---@param v4 vec2
 ---@return vec2
-function MathUtils.intersect(v1, v2, v3, v4) 
+function MathUtils.intersect(v1, v2, v3, v4)
   local denominator = (v4.y - v3.y) * (v2.x - v1.x) - (v4.x - v3.x) * (v2.y - v1.y)
   if denominator == 0 then return nil end
 
@@ -25,7 +25,7 @@ end
 ---@param v3 vec2
 ---@param v4 vec2
 ---@return vec2
-function MathUtils.hasIntersection2D(v1, v2, v3, v4) 
+function MathUtils.hasIntersection2D(v1, v2, v3, v4)
   local denominator = (v4.y - v3.y) * (v2.x - v1.x) - (v4.x - v3.x) * (v2.y - v1.y)
   if denominator == 0 then return false end
 
@@ -39,7 +39,7 @@ end
 ---@param v3 vec3
 ---@param v4 vec3
 ---@return boolean
-function MathUtils.hasIntersection3D(v1, v2, v3, v4) 
+function MathUtils.hasIntersection3D(v1, v2, v3, v4)
   local denominator = (v4.z - v3.z) * (v2.x - v1.x) - (v4.x - v3.x) * (v2.z - v1.z)
   if denominator == 0 then return false end
 
@@ -57,8 +57,8 @@ function MathUtils.distanceBetweenCarAndPoint(carPos, carDir, halfLength, halfWi
   local dy = carDir.z * d * 2
   local px = point.x - ax
   local py = point.z - ay
-  local h = math.saturateN((px * dx + py * dy) / (dx^2 + dy^2))
-  return math.sqrt((px - dx * h)^2 + (py - dy * h)^2) - halfWidth
+  local h = math.saturateN((px * dx + py * dy) / (dx ^ 2 + dy ^ 2))
+  return math.sqrt((px - dx * h) ^ 2 + (py - dy * h) ^ 2) - halfWidth
 end
 
 return MathUtils

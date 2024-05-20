@@ -22,7 +22,7 @@ function EditorTabRules:doUI()
   for i, v in ipairs(self.editor.rules.laneRoles) do
     ui.pushID(i)
     ui.text(string.format('%d: %s', i, v.name))
-    
+
     ui.offsetCursorX(30)
     if ui.slider('##priority', _slider:set(v.priority), -10, 10, 'Priority: %.0f') then
       v.priority, c = _slider.value, true

@@ -3,7 +3,7 @@ local function loadColorsList(filename)
   for line in io.lines(filename) do
     table.insert(colors, rgbm.new(line))
   end
-  return function () return table.random(colors) end
+  return function() return table.random(colors) end
 end
 
 local colorRandom = loadColorsList('extension/config/data_oem_colors_modern.txt')
@@ -63,10 +63,10 @@ local cars = {
       rear = 'rear_light_1',
       brakes = { 'brake_light_1', 'brake_light_2' },
     },
-    dimensions = { 
-      front = 0.5, 
-      rear = 4, 
-      turningOffset = 2.3, 
+    dimensions = {
+      front = 0.5,
+      rear = 4,
+      turningOffset = 2.3,
       width = 1.6,
       wheelRadius = 0.33,
       fakeShadowX = 0.8 + 0.35,
@@ -125,14 +125,14 @@ local cars = {
     maxSpeed = 125,
     color = colorRandom,
     lights = {
-      headlights = {'headlight','headlight001',},
-      rearCombined = {'lights_r','lights_r2',} ,
+      headlights = { 'headlight', 'headlight001', },
+      rearCombined = { 'lights_r', 'lights_r2', },
       brakes = 'brake_top',
-	 LED = {'Object001','Object002',},
-	 LED_RGB = {24,4,0,},
-	  bodymaterial = 'body',
-	  --bodymesh = 'body',
-	  ksshader = 'txDetail', --'txDiffuse', --'txDetail',
+      LED = { 'Object001', 'Object002', },
+      LED_RGB = { 24, 4, 0, },
+      bodymaterial = 'body',
+      --bodymesh = 'body',
+      ksshader = 'txDetail', --'txDiffuse', --'txDetail',
     },
     dimensions = {
       front = 0.5,
@@ -142,7 +142,7 @@ local cars = {
       wheelRadius = 0.33,
       fakeShadowX = 0.8 + 0.35,
       fakeShadowZ = 2.25 + 0.15,
-          hOffset = 0.25,
+      hOffset = 0.25,
     },
     physics = {
       mass = 1500 * massMult,
@@ -242,7 +242,7 @@ local cars = {
       wheelRadius = 0.33,
       fakeShadowX = 0.8 + 0.35,
       fakeShadowZ = 2.25 + 0.15,
-          hOffset = 0.15,
+      hOffset = 0.15,
     },
     physics = {
       mass = 1500 * massMult,
@@ -264,14 +264,14 @@ local cars = {
     maxSpeed = 130,
     color = colorRandom,
     lights = {
-      headlights = {'headlights',},
-      rearCombined = 'lights_r' ,
+      headlights = { 'headlights', },
+      rearCombined = 'lights_r',
       brakes = 'brake_top',
-	 --LED = {'top_light','taxiataxi_lights',},
-	 --LED_RGB = {8,6,2,},
-	  bodymaterial = 'body',
-	  --bodymesh = 'body',
-	  ksshader = 'txDetail', --'txDiffuse', --'txDetail',
+      --LED = {'top_light','taxiataxi_lights',},
+      --LED_RGB = {8,6,2,},
+      bodymaterial = 'body',
+      --bodymesh = 'body',
+      ksshader = 'txDetail', --'txDiffuse', --'txDetail',
     },
     dimensions = {
       front = 0.5,
@@ -315,7 +315,7 @@ local cars = {
       wheelRadius = 0.33,
       fakeShadowX = 0.8 + 0.35,
       fakeShadowZ = 2.25 + 0.15,
-          hOffset = 0.15,
+      hOffset = 0.15,
     },
     physics = {
       mass = 1500 * massMult,

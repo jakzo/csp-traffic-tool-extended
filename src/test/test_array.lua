@@ -1,6 +1,3 @@
-
-
-
 -- function frameBegin(dt, gameDT)
 --   collectgarbage()
 --   ac.perfBegin('perf 2')
@@ -41,25 +38,25 @@
 --   ac.debug('n2', n)
 -- end
 
-  -- local m = ac.findMeshes('aclogo')
-  -- m:setMaterialTexture('txDiffuse', {
-  --   textureSize = vec2(512, 512), -- although optional, I recommend to set it: skin could replace texture by one with different resolution
-  --   background = rgbm(1, 0, 0, 1),  -- set to nil (or remove) to reuse original texture as background, set to skip background preparation completely
-  --   region = {                      -- if not set, whole texture will be repainted
-  --     from = vec2(100, 100),
-  --     size = vec2(100, 100)
-  --   },
-  --   callback = function (dt)
-  --     ac.debug('dt', dt)
-  --     -- display.rect{ pos = vec2(), size = vec2(300, 300), color = rgbm(math.random(), math.random(), math.random(), 1) }
-  --   end
-  -- })
+-- local m = ac.findMeshes('aclogo')
+-- m:setMaterialTexture('txDiffuse', {
+--   textureSize = vec2(512, 512), -- although optional, I recommend to set it: skin could replace texture by one with different resolution
+--   background = rgbm(1, 0, 0, 1),  -- set to nil (or remove) to reuse original texture as background, set to skip background preparation completely
+--   region = {                      -- if not set, whole texture will be repainted
+--     from = vec2(100, 100),
+--     size = vec2(100, 100)
+--   },
+--   callback = function (dt)
+--     ac.debug('dt', dt)
+--     -- display.rect{ pos = vec2(), size = vec2(300, 300), color = rgbm(math.random(), math.random(), math.random(), 1) }
+--   end
+-- })
 
 
 
-  
 
-  --[[ local start, startSide = 0, 0
+
+--[[ local start, startSide = 0, 0
   local loopStart, loopStartPos = 0, nil
   local startPos = nil
   local i = 2

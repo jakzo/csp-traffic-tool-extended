@@ -98,14 +98,15 @@ function TrafficDriver:update(dt)
   -- Lower refresh rate for cars further away
   -- ac.perfFrameBegin(2020)
   local distanceSquared = self.pos:distanceSquared(sim.cameraPosition, 400)
-  local farAway = distanceSquared > 100^2 and (distanceSquared > 250^2 or self.guide == nil or not self.guide.maneuvering == ManeuverBase.ManeuverNone or speedKmh < 1)
+  local farAway = distanceSquared > 100 ^ 2 and
+  (distanceSquared > 250 ^ 2 or self.guide == nil or not self.guide.maneuvering == ManeuverBase.ManeuverNone or speedKmh < 1)
   if farAway then
     if self._farSkip > 0 then
       self._farSkip = self._farSkip - 1
       if self.car ~= nil then self.car:extrapolateMovement(speedKmh / 3.6 * dt) end
       return
     else
-      self._farSkip = distanceSquared > 400^2 and 4 or 1
+      self._farSkip = distanceSquared > 400 ^ 2 and 4 or 1
       dt = dt * (self._farSkip + 1)
     end
   end
@@ -142,7 +143,7 @@ function TrafficDriver:update(dt)
         self.guide = nil
         return
       end
-      
+
       self.guide:calculateCurrentPosInto(self.pos, false)
       self.car:initializePos(_initPos, self.pos)
     end
@@ -193,7 +194,7 @@ function TrafficDriver:update(dt)
     self._awarenessSleep = self._awarenessSleep - dt
   end
   -- ac.perfFrameEnd(2080)
-  
+
   -- ac.perfFrameBegin(2090)
   if movingAtLeastABit or self._targetSpeed > 0.5 then
     _driverUpdateSpeed(self, dt)
@@ -263,10 +264,13 @@ end
 function TrafficDriver:updateAwareness(dt)
   self._distanceToNext, self._nextCar, self._distanceTag = self.guide:distanceToNextCar()
   if self._distanceTag == nil then error('DistanceTag is required') end
-  if self._distanceToNext < 2 and self._distanceTag == DistanceTags.IntersectionMergingCarInFront then self.pauseFor = _mmax(_mrandom() * 3 - 1, 0) end
-  if self._nextCar ~= nil and not CarBase.isInstanceOf(self._nextCar) then error('Wrong type: '..tostring(self._nextCar)) end
+  if self._distanceToNext < 2 and self._distanceTag == DistanceTags.IntersectionMergingCarInFront then self.pauseFor =
+    _mmax(_mrandom() * 3 - 1, 0) end
+  if self._nextCar ~= nil and not CarBase.isInstanceOf(self._nextCar) then error('Wrong type: ' ..
+    tostring(self._nextCar)) end
   self._distanceToNext = self._distanceToNext - self.dimensions.front
-  self._awarenessSleep = self.speedKmh < 0.1 and 0.5 or self.guide.maneuvering and 0.1 or math.clampN((self._distanceToNext / (self.speedKmh / 3.6)) * 0.2, 0.1, 0.3)
+  self._awarenessSleep = self.speedKmh < 0.1 and 0.5 or self.guide.maneuvering and 0.1 or
+  math.clampN((self._distanceToNext / (self.speedKmh / 3.6)) * 0.2, 0.1, 0.3)
 end
 
 function TrafficDriver:updateCar()
@@ -333,29 +337,34 @@ function TrafficDriver:draw3D(layers)
     end
   end
 
-  layers:with('Name', function () 
-    add('%s, %s', tostring(self), tostring(self.car)) 
+  layers:with('Name', function()
+    add('%s, %s', tostring(self), tostring(self.car))
   end)
-  layers:with('Distance to next', function () 
-    add('DTN: %.2f m (%s, next car=%s, real d.=%.2f m, opt.m.: %.2f m)', self._distanceToNext, self._distanceTag.name, self._nextCar, 
-      self.car and self._nextCar and self.car:freeDistanceTo(self._nextCar, self.car:getDirRef()) or -1, self._optimalMargin) 
+  layers:with('Distance to next', function()
+    add('DTN: %.2f m (%s, next car=%s, real d.=%.2f m, opt.m.: %.2f m)', self._distanceToNext, self._distanceTag.name,
+      self._nextCar,
+      self.car and self._nextCar and self.car:freeDistanceTo(self._nextCar, self.car:getDirRef()) or -1,
+      self._optimalMargin)
   end)
-  layers:with('Waiting', function () 
-    add('Waiting for: %.2f s', self.pauseFor) 
+  layers:with('Waiting', function()
+    add('Waiting for: %.2f s', self.pauseFor)
   end)
-  layers:with('Speed', function () 
-    add('Spd: %.2f km/h (tsp: %.2f km/h, turn=%s)', self.car:getSpeedKmh(), self._targetSpeed, self.car and self.car.turn or '?') 
+  layers:with('Speed', function()
+    add('Spd: %.2f km/h (tsp: %.2f km/h, turn=%s)', self.car:getSpeedKmh(), self._targetSpeed,
+      self.car and self.car.turn or '?')
   end)
-  layers:with('Next intersection', function () 
-    add('Int: %s, dst: %.1f m', self.guide._meta.nextLink and self.guide._meta.nextLink.intersection or "N/A", self.guide._meta.distanceToNextLink) 
+  layers:with('Next intersection', function()
+    add('Int: %s, dst: %.1f m', self.guide._meta.nextLink and self.guide._meta.nextLink.intersection or "N/A",
+      self.guide._meta.distanceToNextLink)
   end)
-  layers:with('Intersection status', function ()
-    add('Ien: maneuver type=%d, maneuver=%s, cur=%s', self.guide.maneuvering, self.guide._curManeuver, self.guide._curCursor) 
+  layers:with('Intersection status', function()
+    add('Ien: maneuver type=%d, maneuver=%s, cur=%s', self.guide.maneuvering, self.guide._curManeuver,
+      self.guide._curCursor)
   end)
-  layers:with('Position on lane', function () 
+  layers:with('Position on lane', function()
     add('Pol: %s', self.guide._curCursor and self.guide._curCursor.distance or 'N/A')
   end)
-  layers:with('Distance from mouse to car', function () 
+  layers:with('Distance from mouse to car', function()
     add('Dst: %f', self:distanceBetweenCarAndPoint(layers:mousePoint()))
   end)
 

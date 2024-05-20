@@ -17,7 +17,8 @@ local TrafficCarPhysics = class('TrafficCarPhysics')
 ---@param definition CarDefinition
 ---@return TrafficCarPhysics
 function TrafficCarPhysics.allocate(definition)
-  local collider = physics.RigidBody(definition.collider, definition.physics.mass, definition.physics.cog or vec3(0, 0.8, 0.2))
+  local collider = physics.RigidBody(definition.collider, definition.physics.mass,
+    definition.physics.cog or vec3(0, 0.8, 0.2))
   collider:setDamping(0.9, 0.9)
   -- collider:setDamping(0, 0)
   collider:setSemiDynamic(true, true)
@@ -49,7 +50,7 @@ function TrafficCarPhysics.allocate(definition)
     _frontWheelDir = vec3(0, 0, 1),
     _frontWheelSide = vec3(1, 0, 0),
 
-    _suspensionOffset = {0, 0, 0, 0},
+    _suspensionOffset = { 0, 0, 0, 0 },
     _sidesDamage = vec4(),
     _collisionIndex = -1,
 
@@ -112,9 +113,13 @@ local _shadowCorners = { vec3(), vec3(), vec3(), vec3() }
 local _wheelPos = vec3()
 
 function TrafficCarPhysics:getPos() return self._transform.position end
+
 function TrafficCarPhysics:getDir() return self._transform.look end
+
 function TrafficCarPhysics:crashed() return self._crashedTime > 0 end
+
 function TrafficCarPhysics:appliesBrakes() return self._crashedTime > _crashBrakesDelay end
+
 function TrafficCarPhysics:settled() return self._stationaryTime > 0.1 end
 
 function TrafficCarPhysics:stealTrackerBlocking()
@@ -229,8 +234,8 @@ function TrafficCarPhysics:update(car, dlen, dt)
     end
   end
 
-  local speedThreshold = car._distanceSquared > 80^2 and 2 or 0.5
-  local angularSpeedThreshold = car._distanceSquared > 80^2 and 0.05 or 0.005
+  local speedThreshold = car._distanceSquared > 80 ^ 2 and 2 or 0.5
+  local angularSpeedThreshold = car._distanceSquared > 80 ^ 2 and 0.05 or 0.005
   if self:appliesBrakes() and self._collider:getSpeedKmh() < speedThreshold and self._collider:getAngularSpeed() < angularSpeedThreshold then
     self._stationaryTime = self._stationaryTime + dt
     if self._stationaryTime > 0.1 then
@@ -266,12 +271,13 @@ function TrafficCarPhysics:update(car, dlen, dt)
       _shadowCorners[i]:set(self._collider:worldPosToLocal(_shadowCorner:set(wc[i]):sub(fc)
         :mul(self._cache.fakeShadowMult):add(fc)))
     end
-    car:setFakeShadow(_shadowCorners, math.lerpInvSat(carUp.y, 0.5, 0.8) * math.lerpInvSat(self._transform.position.y - fc.y, 2, 0.2))
+    car:setFakeShadow(_shadowCorners,
+      math.lerpInvSat(carUp.y, 0.5, 0.8) * math.lerpInvSat(self._transform.position.y - fc.y, 2, 0.2))
   else
     for i = 1, 4 do
       if self._crashedTime > _crashBrakesDelay then self._wheelAngVel[i] = self._wheelAngVel[i] * 0.5 end
-      if wheelNodes ~= nil then 
-        wheelNodes[i]:rotate(_dirSide, self._wheelAngVel[i] * self._cache.wheelRadiusInv * dt) 
+      if wheelNodes ~= nil then
+        wheelNodes[i]:rotate(_dirSide, self._wheelAngVel[i] * self._cache.wheelRadiusInv * dt)
       end
     end
     car:setFakeShadow(nil, 0)
@@ -299,7 +305,7 @@ local function getPool(definition)
     as it would have to happen in physics thread. That’s why there is a delay on releasing an item back to
     the pool.
     ]]
-    pool = Pool(function () return TrafficCarPhysics(definition) end, true)
+    pool = Pool(function() return TrafficCarPhysics(definition) end, true)
     _pools[definition] = pool
   end
   return pool

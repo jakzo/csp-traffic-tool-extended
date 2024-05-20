@@ -1,13 +1,13 @@
-local AABB = require('AABB')
-local Array = require('Array')
+local AABB                   = require('AABB')
+local Array                  = require('Array')
 local CubicInterpolatingLane = require('CubicInterpolatingLane')
-local IntersectionLink = require('IntersectionLink')
-local LaneCursor = require('LaneCursor')
-local TrafficConfig = require('TrafficConfig')
-local TrafficContext = require('TrafficContext')
-local DistanceTags   = require('DistanceTags')
+local IntersectionLink       = require('IntersectionLink')
+local LaneCursor             = require('LaneCursor')
+local TrafficConfig          = require('TrafficConfig')
+local TrafficContext         = require('TrafficContext')
+local DistanceTags           = require('DistanceTags')
 
----@class EdgeMeta 
+---@class EdgeMeta
 ---@field dir number
 ---@field dirLengthInv number
 ---@field distanceToNextLink number @If there isn’t a link, a massive value (1e9)
@@ -18,11 +18,12 @@ local DistanceTags   = require('DistanceTags')
 ---@field allowLaneChanges boolean
 ---@field allowUTurns boolean
 ---@field side vec3
-local _edgeMeta = {}
+local _edgeMeta              = {}
 
 --- @param edge EdgeMeta
 local function _debugMetaInfo(edge)
-  return string.format('priority: %f\nspreadMult: %f\nspeedLimit: %f\ndistanceToNextLink: %f', edge.priority, edge.spreadMult, edge.speedLimit, edge.distanceToNextLink)
+  return string.format('priority: %f\nspreadMult: %f\nspeedLimit: %f\ndistanceToNextLink: %f', edge.priority,
+    edge.spreadMult, edge.speedLimit, edge.distanceToNextLink)
 end
 
 ---@class TrafficLane : CubicInterpolatingLane
@@ -37,7 +38,7 @@ local lastIndex = 0
 local _msaturate = math.saturate
 
 function TrafficLane:__tostring()
-  return '<Lane: '..self.name..'>'
+  return '<Lane: ' .. self.name .. '>'
 end
 
 local vecUp = vec3(0, 1, 0)
@@ -93,7 +94,7 @@ function TrafficLane:initialize(laneDef)
 
   -- Some preprocessing for AIs
   self.priorityOffset = laneDef.priorityOffset
-  self.edgesMeta = Array.range(self.size, function (i)
+  self.edgesMeta = Array.range(self.size, function(i)
     local d = (self.points[i % self.size + 1] - self.points[i]):normalize()
     return {
       dir = d,
@@ -126,7 +127,7 @@ function TrafficLane:finalize()
       e.nextLink = link
       local distanceToNextLink = self:distanceToUpcoming(distance, link.from)
       e.distanceToNextLink = distanceToNextLink
-      if distanceToNextLink < 24 and speedLimit > 40 then        
+      if distanceToNextLink < 24 and speedLimit > 40 then
         local interCloseness = math.lerpInvSat(distanceToNextLink, 24, 8)
         speedLimit = math.lerp(speedLimit, 40, interCloseness)
       end
@@ -176,7 +177,7 @@ function TrafficLane:canSpawnAtBeginning()
   if self.loop and self.totalDistance - cars[1].distance < 10 then
     return false
   end
-  
+
   return true
 end
 
@@ -212,7 +213,7 @@ end
 
 local function findClosestLeftIndexCallback(car, i, distance) return car.distance < distance end
 
----Finds index of a cursor which is just in front of given distance. Next cursor (`index + 1`) would 
+---Finds index of a cursor which is just in front of given distance. Next cursor (`index + 1`) would
 ---refer to a cursor behind given distance.
 ---@param distance number @Lane distance (`0`…`totalDistance`)
 function TrafficLane:findClosestLeftIndex(distance)
@@ -238,7 +239,7 @@ local _mmin = math.min
 ---@return LaneCursor|nil @Lane cursor following the given distance (use to to check their speed).
 function TrafficLane:distanceToNearest(distance)
   local ordered = self.orderedCars
-  if ordered.length == 0 then 
+  if ordered.length == 0 then
     return 1e9, nil
   end
   local nextCursorIndex = self:findClosestLeftIndex(distance)
@@ -296,8 +297,11 @@ function TrafficLane:getPositionDirectionInto(vPos, vDir, point, edgePos, estima
   local sf = edgePos < 0.5
   self:interpolateInto(vPos, point, edgePos, estimate)
   self:interpolateInto(vDir, point, sf and edgePos + 0.1 or edgePos - 0.1, estimate)
-  if sf then vDir:sub(vPos)
-  else vDir:scale(-1):add(vPos) end
+  if sf then
+    vDir:sub(vPos)
+  else
+    vDir:scale(-1):add(vPos)
+  end
   return vPos, vDir:normalize()
 end
 
@@ -341,7 +345,7 @@ function TrafficLane:randomDropSpot(r)
   local randomPoint = _mrandom(self.size - 2)
   local randomEdgePos = _mrandom()
   local distance = self.edgesCubic[randomPoint].totalDistance + self.edgesLength[randomPoint] * randomEdgePos
-  if self.totalDistance - distance > 60 or self:endsWithIntersection() then 
+  if self.totalDistance - distance > 60 or self:endsWithIntersection() then
     local randomPointPos = _randomPointPos:setLerp(self.points[randomPoint], self.points[randomPoint + 1], randomEdgePos)
 
     -- Spawning in front of player car to test driving behaviour
@@ -354,9 +358,9 @@ function TrafficLane:randomDropSpot(r)
     -- end
 
     if spawnPointFits(randomPointPos) then
-      if not self.linkedIntersections:some(function (linked)
-        return self:distanceTo(linked.to, distance) < 5 and self:distanceTo(linked.from, distance) > -5
-      end) then
+      if not self.linkedIntersections:some(function(linked)
+            return self:distanceTo(linked.to, distance) < 5 and self:distanceTo(linked.from, distance) > -5
+          end) then
         local nlIndex = self:findClosestLeftIndex(distance)
         local nl = self.orderedCars:at(nlIndex)
         local nr = self.orderedCars:at(nlIndex + 1)
@@ -465,18 +469,20 @@ end
 function TrafficLane:interpolateDistance(distance)
   for i = 2, self.size do
     if self.edgesCubic[i].totalDistance > distance then
-      return self:interpolate(i - 1, math.lerpInvSat(distance, self.edgesCubic[i - 1].totalDistance, self.edgesCubic[i].totalDistance))
+      return self:interpolate(i - 1,
+        math.lerpInvSat(distance, self.edgesCubic[i - 1].totalDistance, self.edgesCubic[i].totalDistance))
     end
   end
-  return self:interpolate(self.size, math.lerpInvSat(distance, self.edgesCubic[self.size].totalDistance - 0.0001, self.totalDistance))
+  return self:interpolate(self.size,
+    math.lerpInvSat(distance, self.edgesCubic[self.size].totalDistance - 0.0001, self.totalDistance))
 end
 
 function TrafficLane:startsWithIntersection()
-  return self.linkedIntersections:some(function (link) return link.from == 0 end)
+  return self.linkedIntersections:some(function(link) return link.from == 0 end)
 end
 
 function TrafficLane:endsWithIntersection()
-  return self.linkedIntersections:some(function (link) return link.to == self.totalDistance end)
+  return self.linkedIntersections:some(function(link) return link.to == self.totalDistance end)
 end
 
 ---@param p vec3
@@ -527,7 +533,7 @@ local _sim = ac.getSim()
 function TrafficLane:draw3D(layers)
   if not layers:near(self.aabb) then return end
 
-  layers:with('Names', true, function ()
+  layers:with('Names', true, function()
     -- render.debugText((self.points[1] + self.points[2]) / 2 + vec3(0, 5, 0), self.name, _colorName, 1.5)
     local d1 = self.points[1]:distanceSquared(_sim.cameraPosition)
     local d2 = self.points[#self.points]:distanceSquared(_sim.cameraPosition)
@@ -540,7 +546,7 @@ function TrafficLane:draw3D(layers)
     end
   end
 
-  layers:with('Intersection overlays', function ()
+  layers:with('Intersection overlays', function()
     for i = 2, self.size do
       if layers:near(self.points[i]) then
         local edgeFrom = self.edgesCubic[i - 1].totalDistance
@@ -562,7 +568,7 @@ function TrafficLane:draw3D(layers)
     end
   end)
 
-  layers:with('Nearest lane points', function ()
+  layers:with('Nearest lane points', function()
     local from, to = self.hashspace:rawPointers(layers:mousePoint())
     while from ~= to do
       local i = from[0]
@@ -571,7 +577,7 @@ function TrafficLane:draw3D(layers)
     end
   end)
 
-  layers:with('World-to-lane projection', function ()
+  layers:with('World-to-lane projection', function()
     local point, edgePos = self:worldToPointEdgePos(layers:mousePoint())
     if point ~= 0 then
       local onLane = self:interpolate(point, edgePos)
@@ -584,37 +590,41 @@ function TrafficLane:draw3D(layers)
 
   if self.loop then
     render.debugArrow(self.points[self.size], self.points[1], 0.5, rgbm(0, 0.7, 3, 1))
-    layers:with('Intersection overlays', function ()
+    layers:with('Intersection overlays', function()
       local edgeFrom = self.edgesCubic[self.size].totalDistance
       local edgeTo = 0
       for j = 1, self.linkedIntersections.length do
         local link = self.linkedIntersections[j]
         if link.from > edgeFrom and link.from < self.totalDistance then
           render.debugLine(link.fromPos, self.points[1], rgbm(3, 0, 3, 1))
-        -- elseif link.to > edgeFrom and link.to < edgeTo then
-        --   render.debugLine(link.toPos, self.points[i - 1], rgbm(3, 0, 3, 1))
+          -- elseif link.to > edgeFrom and link.to < edgeTo then
+          --   render.debugLine(link.toPos, self.points[i - 1], rgbm(3, 0, 3, 1))
         end
       end
     end)
   end
 
-  layers:with('Intersection enters and exits', function ()
+  layers:with('Intersection enters and exits', function()
     for j = 1, #self.linkedIntersections do
       local link = self.linkedIntersections[j]
       if link.fromPos ~= nil then
         render.debugArrow(link.fromPos, link.fromPos + self:getDirection(link.from), 0.2, rgbm(0, 3, 0, 1))
-        render.debugText(link.fromPos, string.format('from %s\nto %s at %.1f m\nside: %d', self, link.intersection, link.from, link.fromSide), rgbm(0, 3, 0, 1), 0.8, render.FontAlign.Left)
+        render.debugText(link.fromPos,
+          string.format('from %s\nto %s at %.1f m\nside: %d', self, link.intersection, link.from, link.fromSide),
+          rgbm(0, 3, 0, 1), 0.8, render.FontAlign.Left)
       end
       if link.toPos ~= nil then
         render.debugArrow(link.toPos, link.toPos + self:getDirection(link.to), 0.2, rgbm(3, 0, 0, 1))
-        render.debugText(link.toPos, string.format('from %s\nto %s at %.1f m\nside: %d', link.intersection, self, link.to, link.toSide), rgbm(3, 0, 0, 1), 0.8, render.FontAlign.Left)
+        render.debugText(link.toPos,
+          string.format('from %s\nto %s at %.1f m\nside: %d', link.intersection, self, link.to, link.toSide),
+          rgbm(3, 0, 0, 1), 0.8, render.FontAlign.Left)
       end
     end
   end)
 
   local dbgText = nil
 
-  layers:with('Cars on lanes', function ()
+  layers:with('Cars on lanes', function()
     dbgText = (dbgText and dbgText .. '\n' or '') .. string.format('%s: %d cars', self.name, #self.orderedCars)
     for i = 1, #self.orderedCars do
       local car = self.orderedCars[i]
@@ -625,15 +635,16 @@ function TrafficLane:draw3D(layers)
     end
   end)
 
-  layers:with('Connected intersections', function ()
+  layers:with('Connected intersections', function()
     dbgText = string.format('%s: %d intersections', self.name, #self.linkedIntersections)
-    self.linkedIntersections:forEach(function (i)
+    self.linkedIntersections:forEach(function(i)
       dbgText = string.format('%s\n  %s from: %f, to: %f', dbgText, i.intersection.name, i.from, i.to)
     end)
   end)
 
   if dbgText ~= nil then
-    render.debugText((self.points[1] + self.points[2]) / 2 + vec3(0, 5, 0), dbgText, rgbm(3, 3, 3, 1), 1, render.FontAlign.Left)
+    render.debugText((self.points[1] + self.points[2]) / 2 + vec3(0, 5, 0), dbgText, rgbm(3, 3, 3, 1), 1,
+      render.FontAlign.Left)
   end
 end
 

@@ -14,11 +14,13 @@ local TrafficCarFactory = class('TrafficCarFactory')
 ---@return TrafficCarFactory
 function TrafficCarFactory:initialize(definitions)
   self.definitions = definitions
-  self.pools = table.map(definitions, function (def) return Pool(function (pool)
-    local ret = TrafficCar(def)
-    ret.__pool = pool
-    return ret
-  end) end)
+  self.pools = table.map(definitions, function(def)
+    return Pool(function(pool)
+      local ret = TrafficCar(def)
+      ret.__pool = pool
+      return ret
+    end)
+  end)
 
   self.activeCars = Array()
   -- distantCars = {}
@@ -34,7 +36,7 @@ end
 local justJumped = false
 
 function TrafficCarFactory:dispose()
-  self.activeCars:clear(function (car) car:dispose() end)
+  self.activeCars:clear(function(car) car:dispose() end)
 
   -- for i = 1, #self.distantCars do
   --   self.distantCars[i]:dispose()
@@ -43,8 +45,8 @@ function TrafficCarFactory:dispose()
   -- self.distantCars = {}
   -- self.activeCarsCount = 0
 
-  table.forEach(self.pools, function (pool)
-    pool:dispose(function (item)
+  table.forEach(self.pools, function(pool)
+    pool:dispose(function(item)
       item:dispose()
     end)
   end)

@@ -12,7 +12,7 @@ local Array = require('Array')
 ---@field entryDir vec3
 ---@field exitDir vec3
 ---@field tlState integer
-local IntersectionSide = class(function (p1, p2)
+local IntersectionSide = class(function(p1, p2)
   return {
     p1 = p1,
     p2 = p2,
@@ -36,14 +36,17 @@ function IntersectionSide.allocate(index, p1, p2)
 end
 
 function IntersectionSide:finalize()
-  self.entryDir = self.entries:reduce(vec3(), function (c, e) return vec3.add(c, e.fromDir) end):normalize()
-  self.exitDir = self.exits:reduce(vec3(), function (c, e) return vec3.add(c, e.toDir) end):normalize()
-  self.centerEntries = self.entries:reduce(vec3(), function (c, e) return vec3.add(c, e.fromPos) end):scale(1 / #self.entries)
-  self.centerExits = self.exits:reduce(vec3(), function (c, e) return vec3.add(c, e.toPos) end):scale(1 / #self.exits)
-  self.entries:sort(function (a, b) return a.fromPos:distanceSquared(self.centerExits) < b.fromPos:distanceSquared(self.centerExits) end)
-  self.exits:sort(function (a, b) return a.toPos:distanceSquared(self.centerEntries) < b.toPos:distanceSquared(self.centerEntries) end)
+  self.entryDir = self.entries:reduce(vec3(), function(c, e) return vec3.add(c, e.fromDir) end):normalize()
+  self.exitDir = self.exits:reduce(vec3(), function(c, e) return vec3.add(c, e.toDir) end):normalize()
+  self.centerEntries = self.entries:reduce(vec3(), function(c, e) return vec3.add(c, e.fromPos) end):scale(1 /
+  #self.entries)
+  self.centerExits = self.exits:reduce(vec3(), function(c, e) return vec3.add(c, e.toPos) end):scale(1 / #self.exits)
+  self.entries:sort(function(a, b) return a.fromPos:distanceSquared(self.centerExits) <
+    b.fromPos:distanceSquared(self.centerExits) end)
+  self.exits:sort(function(a, b) return a.toPos:distanceSquared(self.centerEntries) <
+    b.toPos:distanceSquared(self.centerEntries) end)
   self.midpoint = (self.entries[1].fromPos + self.exits[1].toPos) / 2
-  self.entries:forEach(function (item) item.enterSide = self end)
+  self.entries:forEach(function(item) item.enterSide = self end)
 end
 
 return class.emmy(IntersectionSide, IntersectionSide.allocate)

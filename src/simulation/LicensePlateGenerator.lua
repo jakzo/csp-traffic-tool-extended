@@ -1,6 +1,7 @@
 -- Very simple license plate generator. Could be done better, but that should do for now
 
-local alphabet = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z' }
+local alphabet = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
+  'U', 'V', 'W', 'X', 'Y', 'Z' }
 
 local function rndLetter()
   return table.random(alphabet)
@@ -47,7 +48,8 @@ function LicensePlateGenerator:generate(meshes)
 
     ui.pushDWriteFont('License Plate:./data;Weight=Black')
     ui.setCursor(vec2(offsetX or 0, (offsetY or 0) + 6))
-    ui.dwriteTextAligned(text, 86, ui.Alignment.Center, ui.Alignment.Center, region.size, false, color or rgbm(0.1, 0.1, 0.1, 1))
+    ui.dwriteTextAligned(text, 86, ui.Alignment.Center, ui.Alignment.Center, region.size, false,
+      color or rgbm(0.1, 0.1, 0.1, 1))
     ui.popDWriteFont()
   end
 
@@ -55,7 +57,7 @@ function LicensePlateGenerator:generate(meshes)
     textureSize = vec2(512, 128),
     background = rgbm.colors.white,
     region = region,
-    callback = function (dt)
+    callback = function(dt)
       -- draw license plate once for color
       drawLicensePlate()
     end
@@ -65,7 +67,7 @@ function LicensePlateGenerator:generate(meshes)
     textureSize = vec2(512, 128),
     background = rgbm(0.5, 0.5, 1, 1),
     region = region,
-    callback = function (dt)
+    callback = function(dt)
       -- draw it a few times with different colors to get some sort of normal map
       local o = 2
       drawLicensePlate(o + 1, 0, rgbm(0, 0.5, 1, 1))
@@ -75,7 +77,6 @@ function LicensePlateGenerator:generate(meshes)
       drawLicensePlate(0, 0, rgbm(0.5, 0.5, 1, 1))
     end
   })
-
 end
 
 return class.emmy(LicensePlateGenerator, LicensePlateGenerator.allocate)

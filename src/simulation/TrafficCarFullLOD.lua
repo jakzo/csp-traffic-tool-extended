@@ -1,26 +1,26 @@
-local LicensePlateGenerator = require('LicensePlateGenerator')
-local SmoothEmissive = require('SmoothEmissive')
-local InertialValue  = require('InertialValue')
-local Pool = require('Pool')
+local LicensePlateGenerator  = require('LicensePlateGenerator')
+local SmoothEmissive         = require('SmoothEmissive')
+local InertialValue          = require('InertialValue')
+local Pool                   = require('Pool')
 
 local _licensePlateGenerator = LicensePlateGenerator()
-local _pools = {}
-local _lastIndex = 0
-local _leftToCreate = 0
+local _pools                 = {}
+local _lastIndex             = 0
+local _leftToCreate          = 0
 
 ---@class TrafficCarFullLOD
 ---@field _modelMain ac.SceneReference
 ---@field _carPaint ac.SceneReference
 ---@field _body ac.SceneReference
 ---@field _wheelRadiusInv number
-local TrafficCarFullLOD = class('TrafficCarFullLOD')
+local TrafficCarFullLOD      = class('TrafficCarFullLOD')
 
 function TrafficCarFullLOD.get(car)
   if _leftToCreate == 0 then return nil end
   -- if true then return nil end
   _leftToCreate = _leftToCreate - 1
   local pool = table.getOrCreate(_pools, car.definition, Pool)
-  return pool:get(function() return TrafficCarFullLOD(car) end, function (lod) lod:assign(car) end)
+  return pool:get(function() return TrafficCarFullLOD(car) end, function(lod) lod:assign(car) end)
 end
 
 function TrafficCarFullLOD.resetLimit()
@@ -44,10 +44,12 @@ function TrafficCarFullLOD:initialize(car)
 
   local body = modelMain:findNodes('BODY')
   local lights = {
-    headlights = SmoothEmissive(modelMain:findMeshes(car.definition.lights.headlights), rgb(50, 50, 50), rgb(0, 0, 0), 0.6, 0),
+    headlights = SmoothEmissive(modelMain:findMeshes(car.definition.lights.headlights), rgb(50, 50, 50), rgb(0, 0, 0),
+      0.6, 0),
     rear = SmoothEmissive(modelMain:findMeshes(car.definition.lights.rear), rgb(5, 0, 0), rgb(0, 0, 0), 0.6, 0),
     brakes = SmoothEmissive(modelMain:findMeshes(car.definition.lights.brakes), rgb(50, 0, 0), rgb(0, 0, 0), 0.6, 0),
-    rearCombined = SmoothEmissive(modelMain:findMeshes(car.definition.lights.rearCombined), rgb(50, 0, 0), rgb(0, 0, 0), 0.6, 0),
+    rearCombined = SmoothEmissive(modelMain:findMeshes(car.definition.lights.rearCombined), rgb(50, 0, 0), rgb(0, 0, 0),
+      0.6, 0),
   }
   local wheels = {
     modelMain:findNodes('WHEEL_LF'),
@@ -58,7 +60,7 @@ function TrafficCarFullLOD:initialize(car)
 
   local prevPositions = car.definition.cache.neutralWheelPositions
   if prevPositions == nil then
-    car.definition.cache.neutralWheelPositions = table.map(wheels, function (w) return w:getPosition() end)
+    car.definition.cache.neutralWheelPositions = table.map(wheels, function(w) return w:getPosition() end)
   end
 
   _licensePlateGenerator:generate(modelMain:findMeshes('texture:Plate_D.dds'))
@@ -126,8 +128,8 @@ function TrafficCarFullLOD:update(car, physicsHandlesWheels, dlen, dspeed, dt)
   local updateRate = 1
   local cfrm = car._frame
   local cdsq = car._distanceSquared
-  if cdsq > 20^2 then
-    if cdsq > 40^2 then
+  if cdsq > 20 ^ 2 then
+    if cdsq > 40 ^ 2 then
       updateRate = 4
     else
       updateRate = 2

@@ -4,7 +4,7 @@ local generic_utils = require "src/generic_utils"
 -- naive capture: 2.6 ms, 288 KB of garbage
 function TestBasic(v1, v2)
   return {
-    doItsThing = function (self, arg)
+    doItsThing = function(self, arg)
       return arg > v2 and arg + v1 or -v2
     end
   }
@@ -14,7 +14,7 @@ end
 function TestInlineMetatable(v1, v2)
   return setmetatable({ v1 = v1, v2 = v2 }, {
     __index = {
-      doItsThing = function (self, arg)
+      doItsThing = function(self, arg)
         return arg > self.v2 and arg + self.v1 or -self.v2
       end
     }
@@ -24,7 +24,7 @@ end
 -- proper metatable: 1.4 ms, 167 KB of garbage
 local _testMt = {
   __index = {
-    doItsThing = function (self, arg)
+    doItsThing = function(self, arg)
       return arg > self.v2 and arg + self.v1 or -self.v2
     end
   }
@@ -53,9 +53,9 @@ local function class2(name, super)
     __className = name,
     super = super,
     allocate = function() return {} end,
-    new = function (_, ...) return _ == ret and ret(...) or ret(_, ...) end,
-    subclass = function (self, name) return class2(name, self) end,
-    isSubclassOf = function (self, parent)
+    new = function(_, ...) return _ == ret and ret(...) or ret(_, ...) end,
+    subclass = function(self, name) return class2(name, self) end,
+    isSubclassOf = function(self, parent)
       while true do
         local mt = getmetatable(self)
         self = mt and mt.__index
@@ -63,14 +63,15 @@ local function class2(name, super)
         if self == nil then return false end
       end
     end,
-    isInstanceOf = function (self, parent) return self.__index == parent or self.__index:isSubclassOf(parent) end,
-    include = function (self, mixin) 
+    isInstanceOf = function(self, parent) return self.__index == parent or self.__index:isSubclassOf(parent) end,
+    include = function(self, mixin)
       for key, value in pairs(mixin) do
         if key == 'included' then value(self) else self[key] = value end
       end
       return self
     end,
-    __tostring = super ~= nil and super.__tostring or function (self) return 'instance of class '..self.__index.__className end,
+    __tostring = super ~= nil and super.__tostring or
+    function(self) return 'instance of class ' .. self.__index.__className end,
     __call = super and super.__call
   }
   ret = setmetatable(base, {
@@ -80,7 +81,7 @@ local function class2(name, super)
       return ret
     end,
     __index = super,
-    __tostring = function (self) return 'class '..self.__className end
+    __tostring = function(self) return 'class ' .. self.__className end
   })
   ret.__index = ret
   ret.class = ret
@@ -99,7 +100,7 @@ function TestCustom:doItsThing(arg)
   return arg > self.v2 and arg + self.v1 or -self.v2
 end
 
-local TestCustomBuiltIn = class('TestCustomBuiltIn', function (v1, v2)
+local TestCustomBuiltIn = class('TestCustomBuiltIn', function(v1, v2)
   return { v1 = v1, v2 = v2 }
 end, class.NoInitialize)
 
@@ -118,7 +119,7 @@ function TestCustomBuiltIn2:doItsThing(arg)
   return arg > self.v2 and arg + self.v1 or -self.v2
 end
 
-local TestCustomBuiltIn3 = class('TestCustomBuiltIn3', function (v1, v2) return table.new(0, 2) end)
+local TestCustomBuiltIn3 = class('TestCustomBuiltIn3', function(v1, v2) return table.new(0, 2) end)
 
 function TestCustomBuiltIn3:initialize(v1, v2)
   self.v1 = v1
@@ -129,7 +130,7 @@ function TestCustomBuiltIn3:doItsThing(arg)
   return arg > self.v2 and arg + self.v1 or -self.v2
 end
 
-local TestCustomBuiltRec = class('TestCustomBuiltRec', class.Pool, function (self, v1, v2)
+local TestCustomBuiltRec = class('TestCustomBuiltRec', class.Pool, function(self, v1, v2)
   self.v1 = v1
   self.v2 = v2
 end)
@@ -146,7 +147,7 @@ function TestCustomBuiltRec:doItsThing(arg)
 end
 
 if true then
-  return function ()
+  return function()
     collectgarbage()
     local v = 1
     for j = 1, 10000 do
@@ -280,10 +281,10 @@ local function tabProfile()
   elseif profilerStarted and ui.button('Stop profiler') then
     profilerStarted = false
     profile.stop()
-    profilerData = table.map(profilerAccumulatingData, function (count, fn)
+    profilerData = table.map(profilerAccumulatingData, function(count, fn)
       return { fn = fn, count = count }
     end)
-    table.sort(profilerData, function (a, b) return a.count > b.count end)
+    table.sort(profilerData, function(a, b) return a.count > b.count end)
   end
 
   ui.offsetCursorY(12)
@@ -291,7 +292,7 @@ local function tabProfile()
   if #profilerData == 0 then
     ui.text('Empty')
   else
-    ui.childWindow('collectedData', vec2(), function ()
+    ui.childWindow('collectedData', vec2(), function()
       for i = 1, #profilerData do
         local e = profilerData[i]
         if e.count > 1 then

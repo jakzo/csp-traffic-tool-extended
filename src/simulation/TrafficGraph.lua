@@ -53,9 +53,8 @@ function TrafficGraph:initialize(lanes, intersections)
     linked:sort(function(a, b) return a.from < b.from end)
 
     if N == 0 then
-
       if not lane.loop then
-        self._gEdges:push(GraphEdge{
+        self._gEdges:push(GraphEdge {
           fromID = #self._gVertices + 1,
           toID = #self._gVertices + 2,
           lane = lane,
@@ -67,7 +66,7 @@ function TrafficGraph:initialize(lanes, intersections)
         self._gVertices:push(lane.points[1])
         self._gVertices:push(lane.points[lane.size])
       else
-        self._gEdges:push({ 
+        self._gEdges:push({
           fromID = 0,
           toID = 0,
           lane = lane,
@@ -75,12 +74,9 @@ function TrafficGraph:initialize(lanes, intersections)
           to = nil
         })
       end
-
     elseif lane.loop then
-
       if N == 1 then
-
-        self._gEdges:push(GraphEdge{ 
+        self._gEdges:push(GraphEdge {
           fromID = linked[1].intersection._index,
           toID = linked[N].intersection._index,
           -- fromIntersection = linked[1].intersection,
@@ -89,10 +85,8 @@ function TrafficGraph:initialize(lanes, intersections)
           from = linked[1],
           to = linked[N],
         })
-
       else
-
-        self._gEdges:push(GraphEdge{ 
+        self._gEdges:push(GraphEdge {
           fromID = linked[N].intersection._index,
           toID = linked[1].intersection._index,
           -- fromIntersection = linked[N].intersection,
@@ -103,7 +97,7 @@ function TrafficGraph:initialize(lanes, intersections)
         })
 
         for i = 1, N - 1 do
-          self._gEdges:push(GraphEdge{ 
+          self._gEdges:push(GraphEdge {
             fromID = linked[i].intersection._index,
             toID = linked[i + 1].intersection._index,
             -- fromIntersection = linked[i].intersection,
@@ -113,14 +107,11 @@ function TrafficGraph:initialize(lanes, intersections)
             to = linked[i + 1],
           })
         end
-
       end
-
     else
-
       if not lane:startsWithIntersection() then
-        self._gEdges:push(GraphEdge{ 
-          fromID = #self._gVertices + 1, 
+        self._gEdges:push(GraphEdge {
+          fromID = #self._gVertices + 1,
           toID = linked[1].intersection._index,
           -- toIntersection = linked[1].intersection,
           lane = lane,
@@ -132,10 +123,10 @@ function TrafficGraph:initialize(lanes, intersections)
       end
 
       for i = 1, N - 1 do
-        self._gEdges:push(GraphEdge{ 
-          fromID = linked[i].intersection._index, 
+        self._gEdges:push(GraphEdge {
+          fromID = linked[i].intersection._index,
           toID = linked[i + 1].intersection._index,
-          -- fromIntersection = linked[i].intersection, 
+          -- fromIntersection = linked[i].intersection,
           -- toIntersection = linked[i + 1].intersection,
           lane = lane,
           from = linked[i],
@@ -144,7 +135,7 @@ function TrafficGraph:initialize(lanes, intersections)
       end
 
       if not lane:endsWithIntersection() then
-        self._gEdges:push(GraphEdge{ 
+        self._gEdges:push(GraphEdge {
           fromID = linked[N].intersection._index,
           toID = #self._gVertices + 1,
           -- fromIntersection = linked[N].intersection,
@@ -155,9 +146,8 @@ function TrafficGraph:initialize(lanes, intersections)
         self._gExitIDs:push(#self._gVertices + 1)
         self._gVertices:push(lane.points[lane.size])
       end
-
     end
-    
+
     lane:finalize()
   end
 
@@ -184,7 +174,7 @@ function TrafficGraph:getGEdge(fromID, toID)
   for i = 1, #self._gEdges do
     local edge = self._gEdges[i]
     if edge.fromID == fromID and edge.toID == toID then return edge end
-  end 
+  end
   return nil
 end
 
@@ -192,8 +182,9 @@ function TrafficGraph:findGEdge(lane, distance)
   local N = #self._gEdges
   for i = 1, N do
     local edge = self._gEdges[i]
-    if edge.lane == lane and (edge.from and edge.from.to or 0) < distance and (edge.to and edge.to.from or lane.totalDistance) > distance then return edge end
-  end 
+    if edge.lane == lane and (edge.from and edge.from.to or 0) < distance and (edge.to and edge.to.from or lane.totalDistance) > distance then return
+      edge end
+  end
   return nil
 end
 
@@ -239,9 +230,9 @@ end
 
 local function findEdgeByLaneCallback(edge, i, data)
   local lane, lanePos = data[1], data[2]
-  if edge.lane ~= lane then return 1/0 end
+  if edge.lane ~= lane then return 1 / 0 end
   local from = edge.from and edge.from.to or 0
-  if from > lanePos + 0.1 then return 1/0 end
+  if from > lanePos + 0.1 then return 1 / 0 end
   return lanePos - from
 end
 
@@ -272,16 +263,16 @@ function TrafficGraph:makeRandomPath()
 end
 
 function TrafficGraph:draw3D(layers)
-  layers:with('Vertices', true, function ()
+  layers:with('Vertices', true, function()
     for i = 1, #self._gVertices do
       render.debugCross(self._gVertices[i], 2, rgbm(0, 0, 3, 1))
       render.debugText(self._gVertices[i], i,
-        self._gEnterIDs:contains(i) and rgbm(0, 3, 0, 1) 
-          or self._gExitIDs:contains(i) and rgbm(3, 0, 0, 1) or rgbm(3, 3, 0, 1), 2)
+        self._gEnterIDs:contains(i) and rgbm(0, 3, 0, 1)
+        or self._gExitIDs:contains(i) and rgbm(3, 0, 0, 1) or rgbm(3, 3, 0, 1), 2)
     end
   end)
 
-  layers:with('Edges', function ()
+  layers:with('Edges', function()
     for i = 1, #self._gEdges do
       render.debugArrow(self:getGPos(self._gEdges[i].fromID), self:getGPos(self._gEdges[i].toID))
     end

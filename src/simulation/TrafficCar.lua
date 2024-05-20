@@ -12,7 +12,7 @@ local _colorDebug = rgbm(0.1, 0.1, 0.1, 1)
 local _posOutside = vec3(0, 1e30, 0)
 local _colorNone = rgb()
 local _damageNone = vec4()
-local _fakeShadowCornersPool = Pool(function() return {vec3(), vec3(), vec3(), vec3()} end)
+local _fakeShadowCornersPool = Pool(function() return { vec3(), vec3(), vec3(), vec3() } end)
 
 ---@class TrafficCar : CarBase
 ---@field active boolean
@@ -58,22 +58,22 @@ function TrafficCar.allocate(definition)
     active = true,
     definition = definition,
     root = root,
-  
+
     _index = _lastIndex,
     _transform = root:getTransformationRaw(),
     _modelLod = modelLod,
-  
+
     -- car actor position
     _pos = vec3(),
     _dir = vec3(),
-  
+
     -- position of car center and rear
     _lastPos = vec3(),
     _rearPos = vec3(),
 
     _speedKmh = 0,
     _lastSpeedKmh = 0,
-  
+
     _frame = 0,
     _debugValue = rgb(),
     _damageSides = vec4(),
@@ -147,9 +147,13 @@ local _dbgValueTmp = rgb()
 function TrafficCar:setDebugValue(r, g, b)
   if not TrafficConfig.debugBehaviour then return end
   local value
-  if r == nil then value = _dbgValueNone
-  elseif g == nil then value = _dbgValueTmp:set(r, 1 - r, 0) 
-  else value = _dbgValueTmp:set(r, g, b) end
+  if r == nil then
+    value = _dbgValueNone
+  elseif g == nil then
+    value = _dbgValueTmp:set(r, 1 - r, 0)
+  else
+    value = _dbgValueTmp:set(r, g, b)
+  end
   if value == self._debugValue then return end
   self._debugValue:set(value)
   self._carPaintMeshes:setMaterialProperty('ksEmissive', value * 30)
@@ -233,7 +237,9 @@ local _dirTmpLook = vec3()
 local _mucrossY = MathUtils.crossY
 
 function TrafficCar:getPosRef() return self._pos end
+
 function TrafficCar:getDirRef() return self._dir end
+
 function TrafficCar:extrapolateMovement(dlen) self._pos:addScaled(self._dir, dlen) end
 
 function TrafficCar:setPos(posRef, speedKmh)
@@ -242,7 +248,7 @@ function TrafficCar:setPos(posRef, speedKmh)
 end
 
 function TrafficCar:updateLODs()
-  if self._distanceSquared < 80^2 ~= (self._fullLOD ~= nil) then
+  if self._distanceSquared < 80 ^ 2 ~= (self._fullLOD ~= nil) then
     if self._fullLOD == nil then
       self._fullLOD = TrafficCarFullLOD.get(self)
     else
@@ -251,7 +257,7 @@ function TrafficCar:updateLODs()
     self._modelLod:setVisible(self._fullLOD == nil)
   end
 
-  if self._distanceSquared < 200^2 ~= (self._fakeShadow ~= nil) then
+  if self._distanceSquared < 200 ^ 2 ~= (self._fakeShadow ~= nil) then
     if self._fakeShadow == nil then
       self._fakeShadow = TrafficCarFakeShadow.get(self)
       if self._fakeShadow ~= nil and (self._fakeShadowCorners ~= nil or self._fakeShadowOpacity ~= nil) then
@@ -279,8 +285,7 @@ local function _carUpdatePosDir(self, dlen, dt)
   local sdsq = self._distanceSquared
   local sho = self._horizontalOffset
 
-  if sdsq < 200^2 or sfrm % (sdsq < 400^2 % 2 or 4) == 0 then
-
+  if sdsq < 200 ^ 2 or sfrm % (sdsq < 400 ^ 2 % 2 or 4) == 0 then
     sho = sho + (self._horizontalOffsetTarget - sho) * dlen * dt
     self._horizontalOffset = sho
 
@@ -296,21 +301,21 @@ local function _carUpdatePosDir(self, dlen, dt)
 
     local srps = self._rearPos
     local drx, dry, drz = spx - srps.x, spy - srps.y, spz - srps.z
-    local sqr = _msqrt(drx*drx + dry*dry + drz*drz)
+    local sqr = _msqrt(drx * drx + dry * dry + drz * drz)
     local dna = sqr < 0.0001
     if dna then sqr = 0.0001 end
     local dril = 1 / sqr
     drx, dry, drz = drx * dril, dry * dril, drz * dril
     sdir.x, sdir.y, sdir.z = drx, dry, drz
 
-    if math.isNaN(sdir.x) then 
+    if math.isNaN(sdir.x) then
       ac.debug('sho', sho)
       ac.debug('spx', spx)
       ac.debug('_dsid.x', _dsid.x)
       ac.debug('_spos.x', _spos.x)
       ac.debug('srps.x', srps.x)
-      ac.debug('drx*drx + dry*dry + drz*drz', drx*drx + dry*dry + drz*drz)
-      error('WTF') 
+      ac.debug('drx*drx + dry*dry + drz*drz', drx * drx + dry * dry + drz * drz)
+      error('WTF')
     end
 
     -- self._rearPos:set(self._dir):scale(-self.definition.dimensions.turningOffset):add(self._pos)
@@ -325,7 +330,7 @@ local function _carUpdatePosDir(self, dlen, dt)
       self.turn = math.applyLag(self.turn, turn, 0.7, dt)
     end
 
-    if not dna and (sdir:dot(self._transform.look) < 0.99998 or sdsq < 40^2) then
+    if not dna and (sdir:dot(self._transform.look) < 0.99998 or sdsq < 40 ^ 2) then
       sdir:copyTo(self._transform.look)
       self._transform.side:setCrossNormalized(sdir, _dirUp)
       if math.isNaN(self._transform.side.x) then
@@ -368,13 +373,13 @@ function TrafficCar:update(dt)
   -- Keeping track of lifespan
   local frame = self._frame + 1
   self._frame = frame
-  
+
   -- Measuring distance to camera and choosing current LOD
   if self._lodUpdateDelay > 0 then
     self._lodUpdateDelay = self._lodUpdateDelay - 1
   else
     self._distanceSquared = self._pos:distanceSquared(sim.cameraPosition)
-    self._lodUpdateDelay = self._distanceSquared > 200^2 and 20 or self._distanceSquared > 80^2 and 10 or 4
+    self._lodUpdateDelay = self._distanceSquared > 200 ^ 2 and 20 or self._distanceSquared > 80 ^ 2 and 10 or 4
     self:updateLODs()
   end
 
@@ -386,7 +391,7 @@ function TrafficCar:update(dt)
   -- ac.perfFrameEnd(1010)
 
   -- ac.perfFrameBegin(1030)
-  local isNearby = self._distanceSquared < 80^2 and frame > 15
+  local isNearby = self._distanceSquared < 80 ^ 2 and frame > 15
   if self._physics == nil and frame > 15 and (isNearby or frame % 8 == 0) and TrafficContext.trackerPhysics:anyAround(self._pos) then
     _carSetupPhysics(self)
   end
@@ -463,7 +468,7 @@ end
 
 function TrafficCar:updatePhysics(dlen, dt)
   if self._physicsFrozenTracker ~= nil then
-    local isNearby = self._distanceSquared < 80^2
+    local isNearby = self._distanceSquared < 80 ^ 2
     if self._frame % (isNearby and 6 or 60) == 0 and TrafficContext.trackerPhysics:anyCloserThan(self._pos, 10) then
       -- self:setDebugValue(rgb(0, 0.1, 0), true)
       self._physics = TrafficCarPhysics.get(self.definition, self)
@@ -495,20 +500,20 @@ end
 function TrafficCar:draw3D(layers)
   local dbgText = {}
 
-  if self._distanceSquared < 50^2 then
-    layers:with('Turn', function ()
+  if self._distanceSquared < 50 ^ 2 then
+    layers:with('Turn', function()
       dbgText[#dbgText + 1] = string.format('turn: %.2f', self.turn)
     end)
 
-    layers:with('Number of blocking cars around', function ()
+    layers:with('Number of blocking cars around', function()
       dbgText[#dbgText + 1] = string.format('blocking: %d', TrafficContext.trackerBlocking:count(self._pos))
     end)
 
-    layers:with('Number of physics cars around', function ()
+    layers:with('Number of physics cars around', function()
       dbgText[#dbgText + 1] = string.format('physics: %d', TrafficContext.trackerPhysics:count(self._pos))
     end)
 
-    layers:with('Debug message', function ()
+    layers:with('Debug message', function()
       dbgText[#dbgText + 1] = string.format('debug: %s', self._dbgText or '-')
     end)
   end

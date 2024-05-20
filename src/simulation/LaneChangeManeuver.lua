@@ -3,7 +3,7 @@ local BezierCurveNormalized = require('BezierCurveNormalized')
 local TrafficContext = require('TrafficContext')
 local PackedArgs = require('PackedArgs')
 local DistanceTags = require('DistanceTags')
-local TrafficConfig= require('TrafficConfig')
+local TrafficConfig = require('TrafficConfig')
 
 local vecTmp0 = vec3()
 local vecTmp1 = vec3()
@@ -31,8 +31,8 @@ end
 ---@param curve BezierCurveNormalized
 local function testCurvePoints(curve)
   return not TrafficContext.trackerBlocking:anyCloserThan(curve:getPointRef(0.25), 1.5)
-    and not TrafficContext.trackerBlocking:anyCloserThan(curve:getPointRef(0.5), 1.5)
-    and not TrafficContext.trackerBlocking:anyCloserThan(curve:getPointRef(0.75), 1.5)
+      and not TrafficContext.trackerBlocking:anyCloserThan(curve:getPointRef(0.5), 1.5)
+      and not TrafficContext.trackerBlocking:anyCloserThan(curve:getPointRef(0.75), 1.5)
 end
 
 ---@param laneTo TrafficLane
@@ -95,7 +95,8 @@ function LaneChangeManeuver.tryCreate(guide, laneTo, edgeMeta, freeSpaceTested)
 
   local p, e, curve, laneToDistance = findManeuverCurve(laneTo, pos, dir, freeSpaceTested)
   if p ~= nil then
-    return LaneChangeManeuver(guide, laneTo, laneTo:startCursorOnEdge(guide:getDriver(), p, e), curve, laneToDistance, edgeMeta)
+    return LaneChangeManeuver(guide, laneTo, laneTo:startCursorOnEdge(guide:getDriver(), p, e), curve, laneToDistance,
+      edgeMeta)
   end
 end
 
@@ -164,8 +165,8 @@ function LaneChangeManeuver.findAlternativeLane(car, currentLane, edgeMeta)
   local currentLaneID = currentLane.id
   local carPos = car:getPosRef()
   local carDir = car:getDirRef()
-  local ml, rl, dl = 1/0, nil, nil
-  local mr, rr, dr = 1/0, nil, nil
+  local ml, rl, dl = 1 / 0, nil, nil
+  local mr, rr, dr = 1 / 0, nil, nil
   while from ~= to do
     local laneID = from[0]
     if laneID ~= currentLaneID then
@@ -235,7 +236,6 @@ function LaneChangeManeuver:advance(speedKmh, dt)
       --     self.cursorFrom, self.cursorTo = self.cursorTo, swap.cursorTo
       --   end
       -- end
-
     end
 
     self._swapTimer = _swapTimer
@@ -292,7 +292,7 @@ end
 ---@return number, CarBase|nil, DistanceTag
 function LaneChangeManeuver:distanceToNextCar()
   local rd, rc, rt = 5, nil, DistanceTags.LaneChangeBase
-  
+
   if self.transition > 0.3 then
     local td, tc, tt = self.cursorTo:distanceToNextCar()
     if td < rd then

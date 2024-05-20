@@ -13,8 +13,8 @@ function TrafficDebugLayers:initialize(root)
   self.level = 1
   if root ~= nil then
     local function runNode(node)
-      table.forEach(node, function (item)
-        self:with(item.name, item.active, function ()
+      table.forEach(node, function(item)
+        self:with(item.name, item.active, function()
           runNode(item.children)
         end)
       end)
@@ -83,11 +83,10 @@ function TrafficDebugLayers:with(name, activeByDefault, callback)
   if r.active then
     self.current = r
     self.level = l + 1
-    try(callback, function (err) ac.log(err) end)
+    try(callback, function(err) ac.log(err) end)
     self.current = c
     self.level = l
   end
 end
 
 return class.emmy(TrafficDebugLayers, TrafficDebugLayers.initialize)
-

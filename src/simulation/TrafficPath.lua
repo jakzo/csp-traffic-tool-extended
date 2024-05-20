@@ -3,7 +3,7 @@
 ---@field nextLane TrafficLane
 ---@field nextLanePos number
 ---@field currentLane TrafficLane
-local TrafficPath = class('TrafficPath', function (grid, pathOrVertexID, nextLane, nextLanePos)
+local TrafficPath = class('TrafficPath', function(grid, pathOrVertexID, nextLane, nextLanePos)
   return {
     grid = grid,
     path = pathOrVertexID,
@@ -48,8 +48,8 @@ function TrafficPath:changeNextTo(newLane, newLanePos)
   if self.nextLane ~= nil then error('Can’t change predetermined path point') end
   if type(self.path) ~= 'number' then error('Can’t change fixed path') end
 
-  local nextLane = self.grid.graph:findEdgeByLane(newLane, newLanePos) 
-    or error(string.format('Can’t change to lane %s at %.1f', newLane, newLanePos))
+  local nextLane = self.grid.graph:findEdgeByLane(newLane, newLanePos)
+      or error(string.format('Can’t change to lane %s at %.1f', newLane, newLanePos))
   self.path = nextLane.toID
 end
 
@@ -57,15 +57,15 @@ function TrafficPath:changeCurrentTo(newLane, newLanePos)
   if self.nextLane ~= nil then error('Can’t change predetermined path point') end
   if type(self.path) ~= 'number' then error('Can’t change fixed path') end
 
-  local edge = self.grid.graph:findEdgeByLane(newLane, newLanePos) 
-    or error(string.format('Can’t change to lane %s at %.1f', newLane, newLanePos))
+  local edge = self.grid.graph:findEdgeByLane(newLane, newLanePos)
+      or error(string.format('Can’t change to lane %s at %.1f', newLane, newLanePos))
   self.path = edge.toID
   self.currentLane = newLane
 end
 
 ---@param grid TrafficGrid
 function TrafficPath.tryCreateWandering(grid)
-  local lane = grid.lanes:random(function (lane) return lane.totalDistance end)
+  local lane = grid.lanes:random(function(lane) return lane.totalDistance end)
   local distance = lane:randomDropSpot()
   if distance ~= nil then
     local edge = grid.graph:findGEdge(lane, distance)

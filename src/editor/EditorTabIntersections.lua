@@ -17,7 +17,7 @@ local minItemHeight = vec2(10, 58)
 
 function EditorTabIntersections:doUI()
   ui.header('Created intersections')
-  ui.childWindow('##intersectionsList', vec2(0, -50), function ()
+  ui.childWindow('##intersectionsList', vec2(0, -50), function()
     local intersectionsList = self.editor.intersectionsList
     local intersLen = #intersectionsList
     if intersLen == 0 then
@@ -27,7 +27,7 @@ function EditorTabIntersections:doUI()
     local scroll = self.editor.selectedIntersection ~= self.oldSelection
     if scroll then
       self.oldSelection = self.editor.selectedIntersection
-      if not ui.mouseBusy() and  self.oldSelection then
+      if not ui.mouseBusy() and self.oldSelection then
         ui.setScrollY(minItemHeight.y * (intersectionsList:indexOf(self.oldSelection) - 2))
       end
     end
@@ -44,7 +44,7 @@ function EditorTabIntersections:doUI()
       intersectionsList:removeAt(toRemoveIndex)
       if self.editor.selectedIntersection == toRemove then self.editor.selectedIntersection = nil end
       self.editor:onChange()
-      ui.toast(ui.Icons.Delete, 'Traffic intersection “'..toRemove.name..'” removed', function ()
+      ui.toast(ui.Icons.Delete, 'Traffic intersection “' .. toRemove.name .. '” removed', function()
         intersectionsList:insert(math.min(toRemoveIndex, #intersectionsList + 1), toRemove)
         self.editor:onChange()
       end)
@@ -77,7 +77,7 @@ function EditorTabIntersections:intersectionItem(inter)
   end
   ui.sameLine(ui.availableSpaceX() - 32)
   ui.button('…', vec2(32, 0))
-  ui.itemPopup(ui.MouseButton.Left, function ()
+  ui.itemPopup(ui.MouseButton.Left, function()
     -- ui.separator()
     toRemove = ui.selectable('Delete intersection')
   end)
@@ -85,7 +85,9 @@ function EditorTabIntersections:intersectionItem(inter)
   ui.offsetCursorX(30)
   if ui.button('Edit connections') then
     self.editor:subUI(EditorEditConnections(self.editor, inter),
-      string.format('require("EditorEditConnections")(self, self.intersectionsList:findFirst(function (s) return s.name == "%s" end))', inter.name))
+      string.format(
+      'require("EditorEditConnections")(self, self.intersectionsList:findFirst(function (s) return s.name == "%s" end))',
+        inter.name))
   end
   ui.sameLine()
   ui.text(string.format('Traffic light: %s', inter.trafficLightProgram or 'No'))

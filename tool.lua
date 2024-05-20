@@ -33,7 +33,7 @@ local TrafficSimulation = require('TrafficSimulation')
 local TrafficConfig = require('TrafficConfig')
 local TrafficDebugLayers = require('TrafficDebugLayers')
 
-local simSettings = ac.storage{
+local simSettings = ac.storage {
   simulationSpeed = 1,
   clickToDelete = false,
   profileGC = false,
@@ -64,7 +64,8 @@ local function trafficTab()
   ui.header('Simulation speed')
   ui.pushFont(ui.Font.Small)
 
-  local speed = refnumber(simSettings.simulationSpeed > 1 and 1 + (simSettings.simulationSpeed - 1) / 30 or simSettings.simulationSpeed)
+  local speed = refnumber(simSettings.simulationSpeed > 1 and 1 + (simSettings.simulationSpeed - 1) / 30 or
+  simSettings.simulationSpeed)
   if ui.slider('##simulationSpeed', speed, 0, 2, string.format('Speed: %.1f', simSettings.simulationSpeed)) then
     simSettings.simulationSpeed = speed.value > 1 and 1 + (speed.value - 1) * 30 or speed.value
   end
@@ -163,7 +164,7 @@ local function trafficTab()
   --   :weight(ui.DWriteFont.Weight.Bold)
   --   :style(ui.DWriteFont.Style.Normal)
   --   :stretch(ui.DWriteFont.Stretch.UltraExpanded)
-  -- ac.debug('MyFavouriteFont', MyFavouriteFont)  
+  -- ac.debug('MyFavouriteFont', MyFavouriteFont)
   -- ui.pushDWriteFont(MyFavouriteFont)  -- you could also just put font here, but if defined once and reused, it would generate less garbage for GC to clean up.
   -- ui.dwriteText('Hey there', 24, rgbm.colors.white)
   -- ui.popDWriteFont()
@@ -186,7 +187,7 @@ ALLOW_TOOLS=1'
     ui.setCursor(vec2(28, 60))
     ui.pushStyleVar(ui.StyleVar.ChildRounding, 8)
     ui.pushStyleColor(ui.StyleColor.ChildBg, rgbm(0.5, 0, 0, 1))
-    ui.childWindow('simErrorMsg', vec2(0, solutionData and 148 or 48), false, 0, function ()
+    ui.childWindow('simErrorMsg', vec2(0, solutionData and 148 or 48), false, 0, function()
       ui.offsetCursor(8)
       ui.text(errorMsg)
       if solutionData ~= nil then
@@ -301,24 +302,23 @@ function script.draw3D()
     simDebugLayers:start()
     simTraffic:draw3D(simDebugLayers, simSettings.clickToDelete)
 
-    table.forEach(DebugShapes, function (item, key)
+    table.forEach(DebugShapes, function(item, key)
       ac.debug(key, item)
       render.debugCross(item, 2, rgbm(3, 0, 0, 1))
       render.debugText(item, key, rgbm(3, 0, 0, 1))
     end)
   end
-
 end
 
 -- Updating simulation and saving on change
 local refreshTimeout = nil
-editor.onChange:subscribe(function ()
-  setTimeout(function ()
+editor.onChange:subscribe(function()
+  setTimeout(function()
     io.save(dataFilename, json.encode(editor:serializeData()))
   end, 3, 'save')
 
   clearTimeout(refreshTimeout)
-  refreshTimeout = setTimeout(function ()
+  refreshTimeout = setTimeout(function()
     trafficRefresh()
   end, 0.5)
 end)

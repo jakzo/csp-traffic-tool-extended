@@ -30,7 +30,7 @@ function TrafficCarFakeShadow.get(car)
   if _leftToCreate == 0 then return nil end
   _leftToCreate = _leftToCreate - 1
   local pool = table.getOrCreate(_pools, car.definition, Pool)
-  return pool:get(function() return TrafficCarFakeShadow(car) end, function (lod) lod:assign(car) end)
+  return pool:get(function() return TrafficCarFakeShadow(car) end, function(lod) lod:assign(car) end)
 end
 
 function TrafficCarFakeShadow.resetLimit()
@@ -40,7 +40,7 @@ end
 ---@param car TrafficCar
 ---@return TrafficCarFakeShadow
 function TrafficCarFakeShadow.allocate(car)
-  local fakeShadow = car.root:createFakeShadow{ opacity = 0.9, squaredness = vec2(1.2, 2) }
+  local fakeShadow = car.root:createFakeShadow { opacity = 0.9, squaredness = vec2(1.2, 2) }
   setPoints(fakeShadow, car)
   return { _fakeShadow = fakeShadow }
 end

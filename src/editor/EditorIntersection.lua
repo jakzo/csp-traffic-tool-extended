@@ -7,7 +7,7 @@ local function _setTrajectoryAllowed(m, f, t, v)
   local u = m[f]
   if u == nil then
     if v == false then
-      m[f] = {[t] = true}
+      m[f] = { [t] = true }
     end
     return
   end
@@ -27,7 +27,7 @@ local function _setTrajectoryAttributes(m, f, t, v)
   local u = m[f]
   if u == nil then
     if v ~= nil then
-      m[f] = {[t] = v}
+      m[f] = { [t] = v }
     end
     return
   end
@@ -46,7 +46,7 @@ end
 local function _setEntryOffset(m, i, v, e)
   local l = m[i]
   if l == nil then
-    l = {0,0}
+    l = { 0, 0 }
     m[i] = l
   end
   l[e and 2 or 1] = v
@@ -180,41 +180,42 @@ function EditorIntersection:encode()
   local _disTr = {}
   for enterID, enterMap in pairs(self.disallowedTrajectories) do
     for exitID, _ in pairs(enterMap) do
-      table.insert(_disTr, {enterID, exitID})
+      table.insert(_disTr, { enterID, exitID })
     end
   end
 
   local _traAt = {}
   for enterID, enterMap in pairs(self.trajectoryAttributes) do
     for exitID, attributes in pairs(enterMap) do
-      table.insert(_traAt, {enterID, exitID, attributes})
+      table.insert(_traAt, { enterID, exitID, attributes })
     end
   end
 
   local _entOf = {}
   for laneID, values in pairs(self.entryOffsets) do
     if values[1] ~= 0 or values[2] ~= 0 then
-      table.insert(_entOf, {lane = laneID, offsets = values})
+      table.insert(_entOf, { lane = laneID, offsets = values })
     end
   end
 
   local _entPo = {}
   for laneID, value in pairs(self.entryPriorityOffsets) do
     if value ~= 0 then
-      table.insert(_entPo, {lane = laneID, offset = value})
+      table.insert(_entPo, { lane = laneID, offset = value })
     end
   end
 
   ---@type SerializedTrafficLightRef
   local _trfLg = nil
   if self.trafficLightProgram ~= nil then
-    _trfLg = { program = self.trafficLightProgram, params = self.trafficLightParams, emissive = self.trafficLightEmissive }
+    _trfLg = { program = self.trafficLightProgram, params = self.trafficLightParams, emissive = self
+    .trafficLightEmissive }
   end
 
   return {
     name = self.name,
     id = self.id,
-    points = self.points:map(function(p) return {p.x, p.y, p.z} end, nil, {}),
+    points = self.points:map(function(p) return { p.x, p.y, p.z } end, nil, {}),
     disallowedTrajectories = #_disTr > 0 and _disTr or nil,
     trajectoryAttributes = #_traAt > 0 and _traAt or nil,
     entryOffsets = #_entOf > 0 and _entOf or nil,

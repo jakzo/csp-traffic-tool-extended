@@ -1,9 +1,9 @@
-local TrafficConfig = require('TrafficConfig')
-local MathUtils  = require('MathUtils')
-local CachingCurve = require('CachingCurve')
-local ManeuverBase = require('ManeuverBase')
+local TrafficConfig    = require('TrafficConfig')
+local MathUtils        = require('MathUtils')
+local CachingCurve     = require('CachingCurve')
+local ManeuverBase     = require('ManeuverBase')
 local IntersectionLink = require('IntersectionLink')
-local DistanceTags = require('DistanceTags')
+local DistanceTags     = require('DistanceTags')
 
 ---@param item IntersectionManeuver
 local function _highlightFlash(item, r, g, b)
@@ -11,7 +11,7 @@ local function _highlightFlash(item, r, g, b)
     local driver = item.guide:getDriver()
     if driver:getCar() == nil then return end
     driver:getCar():setDebugValue(r, g, b)
-    setTimeout(function () 
+    setTimeout(function()
       if driver:getCar() == nil then return end
       driver:getCar():setDebugValue()
     end, 0.3)
@@ -51,7 +51,8 @@ function IntersectionManeuver:initialize(intersection, guide, fromDef, toDef)
   self._inCurve = -fromDef.lane:distanceToUpcoming(guide:getDistance(), fromDef.from)
   self.active = false
   self.closeToTraverse = false
-  self._trajectoryPriority = intersection.mergingIntersection and _mrandom() or intersection:getPriorityLevel(fromDef.lane, toDef.lane)
+  self._trajectoryPriority = intersection.mergingIntersection and _mrandom() or
+  intersection:getPriorityLevel(fromDef.lane, toDef.lane)
   self._trajectoryOffsetPriority = lastIndex
   self._checkDelay = 0
   self._blockedCounter = 0
@@ -64,7 +65,7 @@ function IntersectionManeuver:initialize(intersection, guide, fromDef, toDef)
 end
 
 function IntersectionManeuver:__tostring()
-  return string.format('<IntersectionManeuver: %s, priority=%.2f, phase=%s>', 
+  return string.format('<IntersectionManeuver: %s, priority=%.2f, phase=%s>',
     not self.closeToTraverse and 'far' or not self.active and 'waiting' or 'traversing',
     self._trajectoryPriority, self.phase)
 end
@@ -81,7 +82,7 @@ local _mmin = math.min
 ---@param iman IntersectionManeuver
 local function findFreeAlternativeCallback(laneLink, _, iman)
   if laneLink.lane ~= iman.toDef.lane
-    and laneLink.toPos ~= nil then
+      and laneLink.toPos ~= nil then
     local distance = laneLink.lane:distanceToNextCar(laneLink.to)
     if iman.inter:areLanesCompatible(iman.fromDef.lane, laneLink.lane, true) then
       return _mmin(distance, 100)
@@ -128,15 +129,15 @@ function IntersectionManeuver:_findWayAroundWide()
     local newCurveInfo = CachingCurve(
       self.guide:getDriver():getPosRef(), dir,
       newLaneLink.lane:interpolateDistance(newLaneLink.to), newLaneLink.lane:getDirection(newLaneLink.to), true)
-    if self.inter.traversing:every(function (e) return e == self or not newCurveInfo:intersects(e.curveInfo) end) then
+    if self.inter.traversing:every(function(e) return e == self or not newCurveInfo:intersects(e.curveInfo) end) then
       self.toDef = newLaneLink
       self.curveInfo = newCurveInfo
       self:activate()
       self.guide:changeNextTo(self.toDef.lane, self.toDef.to)
       -- if self.inter.name == 'I29' then
-        -- ac.debug('found a wide way around', math.random()) 
-        -- DebugShapes['_findWayAroundWide: FROM'] = self.guide:getDriver():getPosRef():clone()
-        -- DebugShapes['_findWayAroundWide: FROM'] = newLaneLink.toPos:clone()
+      -- ac.debug('found a wide way around', math.random())
+      -- DebugShapes['_findWayAroundWide: FROM'] = self.guide:getDriver():getPosRef():clone()
+      -- DebugShapes['_findWayAroundWide: FROM'] = newLaneLink.toPos:clone()
       -- end
       return
     end
@@ -151,8 +152,10 @@ local _dpos = vec3()
 ---@param b IntersectionManeuver
 local function _compareTrajectories(a, b)
   if not a.makingUTurn and not b.makingUTurn then return 0 end
-  local aUTurnLp = a.makingUTurn and a.toDef.toPos:distanceSquared(b.fromDef.fromPos) < a.fromDef.fromPos:distanceSquared(b.fromDef.fromPos) * 0.7
-  local bUTurnLp = b.makingUTurn and b.toDef.toPos:distanceSquared(a.fromDef.fromPos) < b.fromDef.fromPos:distanceSquared(a.fromDef.fromPos) * 0.7
+  local aUTurnLp = a.makingUTurn and
+  a.toDef.toPos:distanceSquared(b.fromDef.fromPos) < a.fromDef.fromPos:distanceSquared(b.fromDef.fromPos) * 0.7
+  local bUTurnLp = b.makingUTurn and
+  b.toDef.toPos:distanceSquared(a.fromDef.fromPos) < b.fromDef.fromPos:distanceSquared(a.fromDef.fromPos) * 0.7
   return aUTurnLp == bUTurnLp and 0 or bUTurnLp and 1 or -1
 end
 
@@ -186,11 +189,11 @@ function IntersectionManeuver:_hasPriorityOver(engagement)
 end
 
 ---@param engagement IntersectionManeuver
----@param greenLightMode boolean 
+---@param greenLightMode boolean
 function IntersectionManeuver:_compatibleWith(engagement, greenLightMode)
-  if self.fromDef == engagement.fromDef -- start from the same position
+  if self.fromDef == engagement.fromDef                           -- start from the same position
       -- or greenLightMode and self.inter.phase == engagement.phase -- green light: ignore trajectories and just go -- TODO:DEV
-      or self.inter.mergingIntersection and engagement.active -- merging intersections work differently
+      or self.inter.mergingIntersection and engagement.active     -- merging intersections work differently
       or not self.curveInfo:intersects(engagement.curveInfo) then -- if trajectories do not intersect, all is good
     return true
   end
@@ -241,13 +244,14 @@ function IntersectionManeuver:_shouldLetOthersFirst()
     return false
   end
 
-  if self._impatienceCounter > 2 and self.inter.traversing:some(function (i) return i.fromDef == self.fromDef and i.toDef == self.toDef end) then
+  if self._impatienceCounter > 2 and self.inter.traversing:some(function(i) return i.fromDef == self.fromDef and
+        i.toDef == self.toDef end) then
     _highlightFlash(self, 0, 1, 1)
     return false
   end
 
   local blocking = self:_anyBlocking()
-  if blocking == nil then 
+  if blocking == nil then
     _highlightFlash(self, 0, 1, 0)
     return false
   end
@@ -273,7 +277,6 @@ function IntersectionManeuver:_checkIfShouldGo(speedKmh, dt)
   end
 
   if not self:_compatibleWithTraversing(tlState == IntersectionLink.StateGreen) then
-
     -- Got tired of waiting and found a different route
     if self._impatienceCounter > 5 and speedKmh < 0.01 and self:_findWayAroundNarrow() then
       _highlightFlash(self, 0, 0, 0.5)
@@ -287,7 +290,6 @@ function IntersectionManeuver:_checkIfShouldGo(speedKmh, dt)
 
     _highlightFlash(self, 0.3, 0, 0)
     return false
-
   end
 
   -- Letting go a car on the right side
@@ -322,9 +324,9 @@ function IntersectionManeuver:advance(speedKmh, dt)
   end
 
   if not active and speedKmh > 10
-      and self._trajectoryPriority >= 0 
+      and self._trajectoryPriority >= 0
       and self.guide._curCursor and self.guide._curCursor.index == 1
-      and self.fromDef.tlState == IntersectionLink.StateGreen 
+      and self.fromDef.tlState == IntersectionLink.StateGreen
       and self.inter.phase == self.inter.lowestPhase then
     active, self.justFloorIt = true, true
     self:activate()
@@ -393,7 +395,8 @@ local function _distanceBetween(driver, otherDriver, futurePosHint)
   local car = driver:getCar()
   local otherCar = otherDriver:getCar()
   if car == nil or otherCar == nil then return 0 end
-  return car:freeDistanceTo(otherCar, _futureDirHint:set(futurePosHint):sub(car:getPosRef()):addScaled(car:getDirRef(), 6):normalize())
+  return car:freeDistanceTo(otherCar,
+    _futureDirHint:set(futurePosHint):sub(car:getPosRef()):addScaled(car:getDirRef(), 6):normalize())
 end
 
 ---@return number, CarBase|nil, DistanceTag
@@ -423,7 +426,8 @@ function IntersectionManeuver:distanceToNextCar()
 
     local curveLeft = self.curveInfo.curve.length - _inCurve
     if curveLeft < 8 then
-      local dd, dc, dt = self.toDef.lane:distanceToNextCar(self.toDef.to - curveLeft, self.guide:getDriver().dimensions.front)
+      local dd, dc, dt = self.toDef.lane:distanceToNextCar(self.toDef.to - curveLeft,
+        self.guide:getDriver().dimensions.front)
       if dd < rd then
         rd, rc, rt = dd, dc, dt
         -- self.driver._nextTag = desiredTag
@@ -449,14 +453,13 @@ function IntersectionManeuver:distanceToNextCar()
     for i = 1, tn do
       local e = ts[i]
       if e ~= self then
-
         if _trajectoryPriority < 0 then
           if e.fromDef.enterSide == self.fromDef.enterSide then
             fromSameSide = fromSameSide + 1
-          elseif (e._trajectoryPriority > self._trajectoryPriority or e._trajectoryPriority == self._trajectoryPriority and self._trajectoryOffsetPriority < e._trajectoryOffsetPriority) 
+          elseif (e._trajectoryPriority > self._trajectoryPriority or e._trajectoryPriority == self._trajectoryPriority and self._trajectoryOffsetPriority < e._trajectoryOffsetPriority)
               and self.curveInfo:intersects(e.curveInfo)
-              and self.curveInfo:intersectsAfter(e.curveInfo, self._inCurve + 3, e._inCurve) 
-              then
+              and self.curveInfo:intersectsAfter(e.curveInfo, self._inCurve + 3, e._inCurve)
+          then
             -- ac.debug('here', self.curveInfo:intersectsAfter(e.curveInfo, self._inCurve + 3, e._inCurve))
             -- if not self.curveInfo:intersectsAfter(e.curveInfo, self._inCurve + 3, e._inCurve) then
             --   for j = 0, 20 do
@@ -476,7 +479,9 @@ function IntersectionManeuver:distanceToNextCar()
         if eDriver.pos:closerToThan(_refFuturePos, 6) then
           local d = _distanceBetween(self.guide:getDriver(), eDriver, _refFuturePos)
           if d < rd then
-            rd, rc, rt = d, eDriver:getCar(), e.fromDef == self.fromDef and DistanceTags.IntersectionCarInFront or DistanceTags.IntersectionMergingCarInFront
+            rd, rc, rt = d, eDriver:getCar(),
+                e.fromDef == self.fromDef and DistanceTags.IntersectionCarInFront or
+                DistanceTags.IntersectionMergingCarInFront
             -- self.driver._nextTag = 'inter: car in front'
             if _needsMinContact and (self._minContact.distance > rd or not self._minContact.active) then
               self._minContact.distance = rd
@@ -487,12 +492,10 @@ function IntersectionManeuver:distanceToNextCar()
             end
           end
         end
-
       end
     end
 
     if self.active then
-
       if _trajectoryPriority < 0 then
         if _inCurve > 2.501 and rd > 1.5 then
           self._trajectoryPriority = 0
@@ -503,7 +506,7 @@ function IntersectionManeuver:distanceToNextCar()
           end
         else
           -- solves gridlocks that occur when two lower priories get stuck because one with larger weight would
-          -- also wait for a car that is blocked by a smaller weight low priority car 
+          -- also wait for a car that is blocked by a smaller weight low priority car
           self._trajectoryOffsetPriority = self._trajectoryOffsetPriority + fromSameSide
         end
       end
@@ -530,7 +533,8 @@ function IntersectionManeuver:draw3D(layers)
     _needsMinContact = true
     if self._minContact.mainCar ~= nil then
       render.debugArrow(self._minContact.mainCar, self._minContact.refFuturePos, 0.1, rgbm(0, 3, 0, 1))
-      render.debugArrow(self._minContact.mainCar, self._minContact.nextCar, 0.1, rgbm(3, self._minContact.active and 0 or 1, 0, 1))
+      render.debugArrow(self._minContact.mainCar, self._minContact.nextCar, 0.1,
+        rgbm(3, self._minContact.active and 0 or 1, 0, 1))
       render.debugText(self._minContact.mainCar, string.format('CNT: %.2f m', self._minContact.distance),
         rgbm(3, 0.5, 0, 1), 1.5)
       -- self._minContact.mainCar = nil

@@ -21,15 +21,15 @@ function EditorArea:initialize(points)
   if vec3.isvec3(points[1]) then
     self.name = "Area #" .. lastIndex
     self.id = lastIndex
-    self.shapes = Array{ points }
+    self.shapes = Array { points }
     self.params = {}
   else
     -- deserialization
     self.name = points.name
     self.id = points.id or lastIndex
-    self.shapes = points.points 
-      and Array{ Array(points.points, vec3.new) }
-      or Array(points.shapes, function (shape) return Array(shape, vec3.new) end)
+    self.shapes = points.points
+        and Array { Array(points.points, vec3.new) }
+        or Array(points.shapes, function(shape) return Array(shape, vec3.new) end)
     self.params = points.params or {}
   end
   self:recalculate()
@@ -39,8 +39,8 @@ function EditorArea:encode()
   return {
     name = self.name,
     id = self.id,
-    shapes = self.shapes:map(function (s)
-      return s:map(function(p) return {p.x, p.y, p.z} end, nil, {})
+    shapes = self.shapes:map(function(s)
+      return s:map(function(p) return { p.x, p.y, p.z } end, nil, {})
     end, nil, {}),
     params = self.params
   }
@@ -52,7 +52,8 @@ function EditorArea:finalize(editor)
     self.finalized = self:encode()
     self.finalized.aabb = { self.aabb.min:table(), self.aabb.max:table() }
   end
-  self.params.priority = editor.rules.laneRoles[self.params.role] and editor.rules.laneRoles[self.params.role].priority or nil
+  self.params.priority = editor.rules.laneRoles[self.params.role] and editor.rules.laneRoles[self.params.role].priority or
+  nil
   self.finalized.params = self.params
   return self.finalized
 end

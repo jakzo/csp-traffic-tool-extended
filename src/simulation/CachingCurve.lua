@@ -16,7 +16,7 @@ local function _curvesIntersect(a, b)
     local ap = a:getPointRef(ad + am * i)
     for j = 0, bs do
       local bp = b:getPointRef(bd + bm * j)
-      if ap:distanceSquared(bp) < 3^2 then
+      if ap:distanceSquared(bp) < 3 ^ 2 then
         return true
       end
     end
@@ -35,14 +35,14 @@ local function _curvesIntersectAfter(a, b, relOffsetA, relOffsetB)
     local ap = a:getPointRef(ad + am * i)
     for j = _mfloor(_mmax(relOffsetB, 0) * bs), bs do
       local bp = b:getPointRef(bd + bm * j)
-      -- if not ap or not bp then 
+      -- if not ap or not bp then
       --   ac.debug('IA: ap', ap)
       --   ac.debug('IA: bp', bp)
       --   ac.debug('IA: relOffsetA', relOffsetA)
       --   ac.debug('IA: relOffsetB', relOffsetB)
-      --   error('ap==nil or bp==nil') 
+      --   error('ap==nil or bp==nil')
       -- end
-      if ap and bp and ap:distanceSquared(bp) < 3^2 then
+      if ap and bp and ap:distanceSquared(bp) < 3 ^ 2 then
         return true
       end
     end
@@ -88,7 +88,7 @@ function CachingCurve:intersects(cCurve)
 
   -- ac.perfFrameBegin(1)
   -- local r
-  -- if not self.compatibleTable or not cCurve.compatibleTable then r = _curvesIntersect(self.curve, cCurve.curve) 
+  -- if not self.compatibleTable or not cCurve.compatibleTable then r = _curvesIntersect(self.curve, cCurve.curve)
   -- else r = self.compatibleTable:get(cCurve, compatibleTableFactory, self, cCurve) end
   -- ac.perfFrameEnd(1)
   -- return r
@@ -96,7 +96,8 @@ end
 
 ---@param cCurve CachingCurve
 function CachingCurve:intersectsAfter(cCurve, offsetSelf, offsetOther)
-  return _curvesIntersectAfter(self.curve, cCurve.curve, offsetSelf / self.curve.length, offsetOther / cCurve.curve.length)
+  return _curvesIntersectAfter(self.curve, cCurve.curve, offsetSelf / self.curve.length,
+    offsetOther / cCurve.curve.length)
 end
 
 return class.emmy(CachingCurve, CachingCurve.initialize)

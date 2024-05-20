@@ -33,7 +33,7 @@ end
 local TrafficIntersection = class('TrafficIntersection')
 
 function TrafficIntersection:__tostring()
-  return '<Intersection: '..self.name..'>'
+  return '<Intersection: ' .. self.name .. '>'
 end
 
 ---@param intersectionDef SerializedIntersection
@@ -42,7 +42,7 @@ function TrafficIntersection:initialize(intersectionDef)
   self.id = intersectionDef.id
   self.name = intersectionDef.name
   self.shape = FlatPolyShape(intersectionDef.points[1][2], TrafficConfig.intersectionYThreshold,
-    intersectionDef.points, function (t) return vec2(t[1], t[3]) end)
+    intersectionDef.points, function(t) return vec2(t[1], t[3]) end)
 
   self._loadingDef = intersectionDef
 
@@ -50,7 +50,7 @@ function TrafficIntersection:initialize(intersectionDef)
   self._incompatibleTable = {}
   self._priorityTable = {}
   self._entryPrioritiesTable = {}
-  self._sides = Array(intersectionDef.points, function (t, i)
+  self._sides = Array(intersectionDef.points, function(t, i)
     return IntersectionSide(i, t, intersectionDef.points[i % #intersectionDef.points + 1])
   end)
 
@@ -62,7 +62,7 @@ function TrafficIntersection:initialize(intersectionDef)
   self.mergingIntersection = false
 
   if intersectionDef.entryPriorityOffsets ~= nil then
-    table.forEach(intersectionDef.entryPriorityOffsets, function (item)
+    table.forEach(intersectionDef.entryPriorityOffsets, function(item)
       self._entryPrioritiesTable[item.lane] = item.offset
     end)
   end
@@ -119,7 +119,7 @@ end
 ---@param lanePosition number
 ---@return IntersectionLink
 function TrafficIntersection:findDefFrom(lane, lanePosition)
-  return self._linksList:findFirst(function (def)
+  return self._linksList:findFirst(function(def)
     return def.lane == lane and math.abs(def.lane:distanceTo(lanePosition, def.from)) < 1
   end) or error(string.format('%s does not start from %s at %.1f m', self, lane, lanePosition))
 end
@@ -128,9 +128,11 @@ end
 ---@param lanePosition number
 ---@return IntersectionLink
 function TrafficIntersection:findDefTo(lane, lanePosition)
-  return self._linksList:findFirst(function (def)
+  return self._linksList:findFirst(function(def)
     return def.lane == lane and math.abs(def.lane:distanceTo(lanePosition, def.to)) < 1
-  end) or ErrorPos(string.format('%s does not end with %s at %.1f m', self, lane, lanePosition), lane:interpolateDistance(lanePosition))
+  end) or
+  ErrorPos(string.format('%s does not end with %s at %.1f m', self, lane, lanePosition),
+    lane:interpolateDistance(lanePosition))
 end
 
 ---@param link IntersectionLink
@@ -157,28 +159,34 @@ function TrafficIntersection:link(lane)
     local edgeInfo = lane.edgesCubic[index]
     local edgePos = hit:distance(vec2(p1.x, p1.z)) / vec2(p2.x, p2.z):distance(vec2(p1.x, p1.z))
     local totalDistance = edgeInfo.totalDistance + lane.edgesLength[index] * edgePos
-    return totalDistance + offset, lane:interpolateDistance(totalDistance + offset), lane:interpolateDistance(totalDistance)
+    return totalDistance + offset, lane:interpolateDistance(totalDistance + offset),
+        lane:interpolateDistance(totalDistance)
   end
 
   local entryPrioritiesTable = self._entryPrioritiesTable
 
   try(function()
-    self.shape:collectIntersections(lane.points, lane.loop, function (indexFrom, posFrom, sideFrom, indexTo, posTo, sideTo)
-      local offset = self._loadingDef.entryOffsets and table.findFirst(self._loadingDef.entryOffsets, function (item) return item.lane == lane.id end) or nil
-      local distanceFrom, posFrom, posOrigFrom = calculateDistanceAndPos(indexFrom, lane.points[indexFrom], lane.points[indexFrom + 1], posFrom, offset and offset.offsets[1] or 0)
-      local distanceTo, posTo, posOrigTo = calculateDistanceAndPos(indexTo, lane.points[indexTo], lane.points[indexTo + 1], posTo, offset and offset.offsets[2] or 0)
-      local item = IntersectionLink(self, lane, distanceFrom, distanceTo, posFrom, posTo, sideFrom, sideTo, posOrigFrom, posOrigTo)
-      lane:addIntersectionLink(item)
-      self:_addLink(item)
+    self.shape:collectIntersections(lane.points, lane.loop,
+      function(indexFrom, posFrom, sideFrom, indexTo, posTo, sideTo)
+        local offset = self._loadingDef.entryOffsets and
+        table.findFirst(self._loadingDef.entryOffsets, function(item) return item.lane == lane.id end) or nil
+        local distanceFrom, posFrom, posOrigFrom = calculateDistanceAndPos(indexFrom, lane.points[indexFrom],
+          lane.points[indexFrom + 1], posFrom, offset and offset.offsets[1] or 0)
+        local distanceTo, posTo, posOrigTo = calculateDistanceAndPos(indexTo, lane.points[indexTo],
+          lane.points[indexTo + 1], posTo, offset and offset.offsets[2] or 0)
+        local item = IntersectionLink(self, lane, distanceFrom, distanceTo, posFrom, posTo, sideFrom, sideTo, posOrigFrom,
+          posOrigTo)
+        lane:addIntersectionLink(item)
+        self:_addLink(item)
 
-      local entryMeta = lane.edgesMeta[indexFrom - 2] or lane.edgesMeta[indexFrom - 1] or lane.edgesMeta[indexFrom]
-      if entryMeta ~= nil then
-        if entryMeta.priority ~= 0 then
-          entryPrioritiesTable[lane.id] = (entryPrioritiesTable[lane.id] or 0) + entryMeta.priority
+        local entryMeta = lane.edgesMeta[indexFrom - 2] or lane.edgesMeta[indexFrom - 1] or lane.edgesMeta[indexFrom]
+        if entryMeta ~= nil then
+          if entryMeta.priority ~= 0 then
+            entryPrioritiesTable[lane.id] = (entryPrioritiesTable[lane.id] or 0) + entryMeta.priority
+          end
         end
-      end
-    end)
-  end, function (err)
+      end)
+  end, function(err)
     ac.error(string.format('Failed to collect intersections: %s vs %s', self.name, lane.name))
   end)
 end
@@ -194,7 +202,7 @@ function TrafficIntersection:finalizeLinks()
   ---@param level number @99 for user-defined incompatibilities, 10 for strict, 1 for weak (can go if either needed or intersection is empty)
   local function markLanesIncompatible(entryLane, exitLane, reason, level)
     if not level then level = 10 end
-    local subTable = table.getOrCreate(incompatibleTable, entryLane, function () return {} end)
+    local subTable = table.getOrCreate(incompatibleTable, entryLane, function() return {} end)
     local existing = subTable[exitLane] or 0
     if existing < level then
       if self.name == 'I1' then
@@ -210,7 +218,7 @@ function TrafficIntersection:finalizeLinks()
   ---@param level number
   local function markLanesPriority(entryLane, exitLane, reason, level)
     if not level then level = 0 end
-    local subTable = table.getOrCreate(priorityTable, entryLane, function () return {} end)
+    local subTable = table.getOrCreate(priorityTable, entryLane, function() return {} end)
     subTable[exitLane] = (subTable[exitLane] or 0) + level
     if self.name == 'I1' then
       ac.log(string.format('priority+=%f: %s, %s (%s)', level, entryLane, exitLane, reason))
@@ -233,17 +241,18 @@ function TrafficIntersection:finalizeLinks()
     markLanesPriority(entry.lane, exit.lane, reason, level)
   end
 
-  if sides:sum(function (s) return s.exits.length end) == 1 and #self._priorityTable == 0 and #self._entryPrioritiesTable == 0
-      and self._linksList[1].fromDir and self._linksList:every(function (s) return s.fromDir and s.fromDir:dot(self._linksList[1].fromDir) > 0.5 end) then
+  if sides:sum(function(s) return s.exits.length end) == 1 and #self._priorityTable == 0 and #self._entryPrioritiesTable == 0
+      and self._linksList[1].fromDir and self._linksList:every(function(s) return s.fromDir and
+        s.fromDir:dot(self._linksList[1].fromDir) > 0.5 end) then
     self.mergingIntersection = true
   end
 
-  sides:removeIf(function (item) return item.entries.length == 0 or item.exits.length == 0 end)
+  sides:removeIf(function(item) return item.entries.length == 0 or item.exits.length == 0 end)
   sides:forEach(IntersectionSide.finalize)
 
   ---@param id integer
   local function findLaneByID(id)
-    local link = self._linksList:findFirst(function (e) return e.lane.id == id end)
+    local link = self._linksList:findFirst(function(e) return e.lane.id == id end)
     return link and link.lane or error(string.format('Lane with ID=%d is missing', id))
   end
 
@@ -259,7 +268,7 @@ function TrafficIntersection:finalizeLinks()
     for i = 1, #self._loadingDef.trajectoryAttributes do
       local e = self._loadingDef.trajectoryAttributes[i] -- { laneFromID, laneToID, attributes }
       local laneFrom, laneTo = findLaneByID(e[1]), findLaneByID(e[2])
-      local l = table.getOrCreate(self.trajectoryAttributes, laneFrom, function () return {} end)
+      local l = table.getOrCreate(self.trajectoryAttributes, laneFrom, function() return {} end)
       l[laneTo] = e[3]
       if e[3].po and e[3].po ~= 0 then
         markLanesPriority(laneFrom, laneTo, 'config', e[3].po)
@@ -270,19 +279,19 @@ function TrafficIntersection:finalizeLinks()
   -- Need to collect straight trajectories, they would have the most priority
   ---@type Array|{[1]: vec3, [2]: vec3}[]
   local straight = Array()
-  sides:forEach(function (side)
+  sides:forEach(function(side)
     ---@param entry IntersectionLink
-    side.entries:forEach(function (entry, i)
+    side.entries:forEach(function(entry, i)
       if entry.fromPos == nil then return end
-      sides:forEach(function (exitSide)
+      sides:forEach(function(exitSide)
         local exit = exitSide.exits:at(i) or exitSide.exits:at(#exitSide.exits)
-        if exit.toPos ~= nil and self:areLanesCompatible(entry.lane, exit.lane) then 
+        if exit.toPos ~= nil and self:areLanesCompatible(entry.lane, exit.lane) then
           if exit.toDir:dot(entry.fromDir) > 0.5 then straight:push({ entry.fromOrigPos, exit.toOrigPos }) end
           return
         end
 
         ---@param exit IntersectionLink
-        exitSide.exits:some(function (exit)
+        exitSide.exits:some(function(exit)
           if exit.toPos == nil or not self:areLanesCompatible(entry.lane, exit.lane) then return false end
           if exit.toDir:dot(entry.fromDir) > 0.5 then straight:push({ entry.fromOrigPos, exit.toOrigPos }) end
           return true
@@ -310,14 +319,13 @@ function TrafficIntersection:finalizeLinks()
   --   end
   -- end
 
-  sides:forEach(function (side)
+  sides:forEach(function(side)
     if #side.entries >= 2 then
-
       -- Disallow making U-turns across lanes or U-turns which are too tight
       ---@param entry IntersectionLink
-      side.entries:forEach(function (entry, i)
+      side.entries:forEach(function(entry, i)
         if i > 1 then
-          side.exits:forEach(function (exit, j)
+          side.exits:forEach(function(exit, j)
             markIncompatible(entry, exit, 'u-turn across another lane')
           end)
         elseif #side.exits > 1 and entry.fromPos:closerToThan(side.exits[1].toPos, 6)
@@ -327,24 +335,25 @@ function TrafficIntersection:finalizeLinks()
       end)
 
       -- Disallow turning right from any but right lane and left from any but left lane
-      sides:forEach(function (exitSide)
+      sides:forEach(function(exitSide)
         if #exitSide.exits < 2 then return end
 
         -- If it’s a turn…
         if side.entryDir:dot(exitSide.exitDir) < 0.5 then
           -- Find index of an entry which is closest to exit — only that one would be allowed to turn there
-          local i = side.entries[1].fromOrigPos:distanceSquared(exitSide.centerExits) < side.entries[#side.entries].fromOrigPos:distanceSquared(exitSide.centerExits) and 1 or #side.entries
+          local i = side.entries[1].fromOrigPos:distanceSquared(exitSide.centerExits) <
+          side.entries[#side.entries].fromOrigPos:distanceSquared(exitSide.centerExits) and 1 or #side.entries
 
           -- But only if that closest entry is allowed to turn there
-          if not exitSide.exits:some(function (exit)
-            return self:areLanesCompatible(side.entries[i].lane, exit.lane)
-          end) then
+          if not exitSide.exits:some(function(exit)
+                return self:areLanesCompatible(side.entries[i].lane, exit.lane)
+              end) then
             return
           end
 
-          side.entries:forEach(function (entry, entryIndex)
+          side.entries:forEach(function(entry, entryIndex)
             if i == entryIndex then return end
-            exitSide.exits:forEach(function (exit)
+            exitSide.exits:forEach(function(exit)
               markIncompatible(entry, exit, 'no turns across lanes')
             end)
           end)
@@ -352,10 +361,10 @@ function TrafficIntersection:finalizeLinks()
       end)
 
       -- Disallow changing lanes during intersection (lower priority, not applied if intersection is empty)
-      sides:forEach(function (exitSide)
+      sides:forEach(function(exitSide)
         if #side.entries == #exitSide.exits and side.entryDir:dot(exitSide.exitDir) > -0.5 then
-          side.entries:forEach(function (entry, entryIndex)
-            exitSide.exits:forEach(function (exit, exitIndex)
+          side.entries:forEach(function(entry, entryIndex)
+            exitSide.exits:forEach(function(exit, exitIndex)
               if entryIndex ~= exitIndex then
                 markIncompatible(entry, exit, 'no changing lanes', 1)
               end
@@ -368,11 +377,11 @@ function TrafficIntersection:finalizeLinks()
     -- Lower priority for turning across an intersection
     -- Then, mark any trajectories that intersect any straight ones as lower priority
     ---@param entry IntersectionLink
-    side.entries:forEach(function (entry)
+    side.entries:forEach(function(entry)
       if entry.fromPos == nil then return end
-      sides:forEach(function (exitSide)
+      sides:forEach(function(exitSide)
         ---@param exit IntersectionLink
-        exitSide.exits:forEach(function (exit)
+        exitSide.exits:forEach(function(exit)
           if exit.toPos == nil then return end
 
           local d = exit.toDir:dot(entry.fromDir)
@@ -382,10 +391,10 @@ function TrafficIntersection:finalizeLinks()
             return
           end
 
-          if straight:some(function (pair)
-            return not rawequal(pair[1], entry.fromOrigPos) and (not rawequal(pair[2], exit.toOrigPos)
-                and MathUtils.hasIntersection3D(entry.fromOrigPos, exit.toOrigPos, pair[1], pair[2]))
-          end) then
+          if straight:some(function(pair)
+                return not rawequal(pair[1], entry.fromOrigPos) and (not rawequal(pair[2], exit.toOrigPos)
+                  and MathUtils.hasIntersection3D(entry.fromOrigPos, exit.toOrigPos, pair[1], pair[2]))
+              end) then
             markPriority(entry, exit, 'goes across a lane', -100)
             if lpT then lpT:push({ entry.fromOrigPos, exit.toOrigPos }) end
           else
@@ -394,7 +403,6 @@ function TrafficIntersection:finalizeLinks()
         end)
       end)
     end)
-
   end)
 end
 
@@ -437,40 +445,40 @@ end
 ---@param layers TrafficDebugLayers
 function TrafficIntersection:draw3D(layers)
   if not layers:near(self.shape.aabb) then return end
-  
-  layers:with('Names', true, function ()
+
+  layers:with('Names', true, function()
     render.debugText(self.shape.aabb.center, self.name, rgbm(3, 3, 0, 1), 1.5)
   end)
-  layers:with('Traversing', true, function ()
-    render.debugText(self.shape.aabb.center, string.format('%d trav.\nphase=%d, low.ph.=%d\n%s', self.traversing.length, self.phase, 
-      self.lowestPhase, self.traversing:map(function (x) return x.phase end):join(', ')), rgbm(3, 3, 0, 1), 0.8)
+  layers:with('Traversing', true, function()
+    render.debugText(self.shape.aabb.center,
+      string.format('%d trav.\nphase=%d, low.ph.=%d\n%s', self.traversing.length, self.phase,
+        self.lowestPhase, self.traversing:map(function(x) return x.phase end):join(', ')), rgbm(3, 3, 0, 1), 0.8)
     for i = 1, #self.traversing do
       local t = self.traversing[i]
-      render.debugArrow(t.guide.driver:getPosRef() + vec3(0, 5, 0), t.guide.driver:getPosRef(), 1, t.justFloorIt and rgbm.colors.purple or rgbm.colors.lime)
+      render.debugArrow(t.guide.driver:getPosRef() + vec3(0, 5, 0), t.guide.driver:getPosRef(), 1,
+        t.justFloorIt and rgbm.colors.purple or rgbm.colors.lime)
     end
   end)
-  layers:with('Inactive engagements', function ()
+  layers:with('Inactive engagements', function()
     for i = 1, #self.engaged do
       if not self.engaged[i].active then
         self.engaged[i]:draw3D(layers)
       end
     end
   end)
-  layers:with('Active engagements', function ()
+  layers:with('Active engagements', function()
     for i = 1, #self.engaged do
       if self.engaged[i].active then
         self.engaged[i]:draw3D(layers)
       end
     end
   end)
-  
+
   if self.trafficLight then
-    layers:with('Traffic lights', function ()
+    layers:with('Traffic lights', function()
       self.trafficLight:draw3D(layers)
     end)
   end
-
-
 end
 
 return class.emmy(TrafficIntersection, TrafficIntersection.initialize)

@@ -11,7 +11,7 @@ local EditorColors = require('EditorColors')
 
 local sim = ac.getSim()
 local uio = ac.getUI()
-local storedSubUICommand = ac.storage{ command = '' }
+local storedSubUICommand = ac.storage { command = '' }
 
 local function ensureIDUnique(list)
   local t = {}
@@ -49,10 +49,10 @@ function EditorMain:initialize(data)
   self.onChange = Event()
 
   self.tabs = Array()
-  self.tabs:push({ name = 'Lanes', fn = function () self.tabLanes:doUI() end })
-  self.tabs:push({ name = 'Intersections', fn = function () self.tabIntersections:doUI() end })
-  self.tabs:push({ name = 'Areas', fn = function () self.tabAreas:doUI() end })
-  self.tabs:push({ name = 'Rules', fn = function () self.tabRules:doUI() end })
+  self.tabs:push({ name = 'Lanes', fn = function() self.tabLanes:doUI() end })
+  self.tabs:push({ name = 'Intersections', fn = function() self.tabIntersections:doUI() end })
+  self.tabs:push({ name = 'Areas', fn = function() self.tabAreas:doUI() end })
+  self.tabs:push({ name = 'Rules', fn = function() self.tabRules:doUI() end })
 
   self.currentlyMovingPoint = nil
   self.currentlyMovingItem = nil
@@ -72,10 +72,10 @@ function EditorMain:initialize(data)
 
   self.rules = data.rules or {
     laneRoles = {
-      { name = 'Parking', priority = -8, speedLimit = 40 },
+      { name = 'Parking',   priority = -8, speedLimit = 40 },
       { name = 'Secondary', priority = -4, speedLimit = 60 },
-      { name = 'Main', priority = 0, speedLimit = 80 },
-      { name = 'Highway', priority = 4, speedLimit = 90 },
+      { name = 'Main',      priority = 0,  speedLimit = 80 },
+      { name = 'Highway',   priority = 4,  speedLimit = 90 },
     },
   }
 
@@ -83,7 +83,7 @@ function EditorMain:initialize(data)
     local restoreCommand = string.format('return function (self) return %s end', storedSubUICommand.command)
     try(function()
       self:subUI(loadstring(restoreCommand)()(self), storedSubUICommand.command)
-    end, function (err)
+    end, function(err)
       ac.debug('Restore error', err)
       ac.debug('Restore command', restoreCommand)
     end)
@@ -103,9 +103,9 @@ end
 ---@return SerializedData
 function EditorMain:finalizeData()
   return {
-    lanes = self.lanesList:map(function (item) return item:finalize(self) end, nil, {}),
-    intersections = self.intersectionsList:map(function (item) return item:finalize(self) end, nil, {}),
-    areas = self.areasList:map(function (item) return item:finalize(self) end, nil, {}),
+    lanes = self.lanesList:map(function(item) return item:finalize(self) end, nil, {}),
+    intersections = self.intersectionsList:map(function(item) return item:finalize(self) end, nil, {}),
+    areas = self.areasList:map(function(item) return item:finalize(self) end, nil, {}),
   }
 end
 
@@ -117,9 +117,9 @@ function EditorMain:doUI(dt)
   end
 
   self.activeTab = nil
-  ui.tabBar('tabs', function ()
-    self.tabs:forEach(function (item)
-      ui.tabItem(item.name, function ()
+  ui.tabBar('tabs', function()
+    self.tabs:forEach(function(item)
+      ui.tabItem(item.name, function()
         self.activeTab = item.name
         ui.childWindow('#scrolling', item.fn)
       end)
@@ -196,7 +196,7 @@ function EditorMain:laneWorldEditor()
           self.selectedArea.shapes:removeAt(math.floor(self.highlightedPointIndex / 1000), true)
           self.selectedArea:recalculate()
           self:onChange()
-          ui.toast(ui.Icons.Delete, 'Shape removed', function ()
+          ui.toast(ui.Icons.Delete, 'Shape removed', function()
             area.shapes:push(shape)
           end)
         end
@@ -217,7 +217,7 @@ function EditorMain:laneWorldEditor()
     end
     if ui.mouseClicked() then
       if uio.altDown then
-        self.creatingNewArea = Array{self.mousePoint:clone()}
+        self.creatingNewArea = Array { self.mousePoint:clone() }
       end
     end
   elseif self.selectedLane ~= nil then
@@ -256,18 +256,18 @@ function EditorMain:laneWorldEditor()
     end
     if ui.mouseClicked() then
       if uio.altDown then
-        self.creatingNewArea = Array{self.mousePoint:clone()}
+        self.creatingNewArea = Array { self.mousePoint:clone() }
       elseif uio.ctrlDown then
         self.creatingNewLane = self.mousePoint:clone()
       elseif uio.shiftDown then
-        self.creatingNewIntersection = Array{self.mousePoint:clone()}
+        self.creatingNewIntersection = Array { self.mousePoint:clone() }
       end
     end
   end
   ui.popFont()
 end
 
-function EditorMain:select(item)  
+function EditorMain:select(item)
   self.selectedLane = EditorLane.isInstanceOf(item) and item or nil
   self.selectedIntersection = EditorIntersection.isInstanceOf(item) and item or nil
   self.selectedArea = EditorArea.isInstanceOf(item) and item or nil
@@ -286,7 +286,8 @@ function EditorMain:draw3D()
     return _rayDistance
   end
 
-  local lookForClicked = not uio.ctrlDown and not uio.shiftDown and not uio.altDown and uio.isMouseLeftKeyClicked and not ui.mouseBusy()
+  local lookForClicked = not uio.ctrlDown and not uio.shiftDown and not uio.altDown and uio.isMouseLeftKeyClicked and
+  not ui.mouseBusy()
   local clickedItem = nil
 
   if self.selectedLane ~= nil and self.selectedLane.points.length > 4 then
@@ -445,7 +446,8 @@ function EditorMain:draw3D()
     elseif self.creatingNewIntersection ~= nil then
       local size = #self.creatingNewIntersection
       for i = 1, size do
-        render.debugLine(self.creatingNewIntersection[i], i == size and self.mousePoint or self.creatingNewIntersection[i + 1], EditorColors.creating)
+        render.debugLine(self.creatingNewIntersection[i],
+          i == size and self.mousePoint or self.creatingNewIntersection[i + 1], EditorColors.creating)
       end
       if size > 1 then
         render.debugLine(self.creatingNewIntersection[1], self.mousePoint, EditorColors.creating)
@@ -453,13 +455,15 @@ function EditorMain:draw3D()
     elseif self.creatingNewArea ~= nil then
       local size = #self.creatingNewArea
       for i = 1, size do
-        render.debugLine(self.creatingNewArea[i], i == size and self.mousePoint or self.creatingNewArea[i + 1], EditorColors.creating)
+        render.debugLine(self.creatingNewArea[i], i == size and self.mousePoint or self.creatingNewArea[i + 1],
+          EditorColors.creating)
       end
       if size > 1 then
         render.debugLine(self.creatingNewArea[1], self.mousePoint, EditorColors.creating)
       end
     elseif self.selectedLane ~= nil then
-      render.debugLine(self.selectedLane.points[uio.shiftDown and 1 or #self.selectedLane.points], self.mousePoint, EditorColors.creating)
+      render.debugLine(self.selectedLane.points[uio.shiftDown and 1 or #self.selectedLane.points], self.mousePoint,
+        EditorColors.creating)
     end
   end
 end

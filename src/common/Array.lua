@@ -58,7 +58,7 @@ function Array.allocate(table, mapCallback, mapCallbackData)
   elseif type(table) == 'number' then
     return { length = table }
   else
-    error('Unexpected argument: '..type(table))
+    error('Unexpected argument: ' .. type(table))
   end
 end
 
@@ -73,7 +73,7 @@ function Array.isArray(obj)
 end
 
 -- Turning to string JS style.
-function Array:__tostring() return '['..self:join()..']' end
+function Array:__tostring() return '[' .. self:join() .. ']' end
 
 -- Use #arrayInstance or arrayInstance.length to get the length.
 function Array:__len() return self.length end
@@ -176,8 +176,11 @@ function Array:remove(item, unordered)
   for i = 1, n do
     if self[i] == item then
       if i < n then
-        if unordered then self[i] = self[n]
-        else _tremove(self, i) end
+        if unordered then
+          self[i] = self[n]
+        else
+          _tremove(self, i)
+        end
       end
       self.length = n - 1
       return true
@@ -194,8 +197,11 @@ function Array:removeAt(index, unordered)
   local n = self.length
   if index > 0 and index <= n then
     if index < n then
-      if unordered then self[index] = self[n]
-      else _tremove(self, index) end
+      if unordered then
+        self[index] = self[n]
+      else
+        _tremove(self, index)
+      end
     end
     self.length = n - 1
     return true
@@ -249,8 +255,11 @@ function Array:join(separator, toStringCallback, toStringCallbackData)
   end
   local r = ''
   for i = 1, n do
-    if i > 1 then r = r .. separator .. toStringCallback(self[i], i, toStringCallbackData)
-    else r = toStringCallback(self[i], i, toStringCallbackData) end
+    if i > 1 then
+      r = r .. separator .. toStringCallback(self[i], i, toStringCallbackData)
+    else
+      r = toStringCallback(self[i], i, toStringCallbackData)
+    end
   end
   return r
 end
@@ -426,7 +435,7 @@ end
 ---@nodiscard
 function Array:maxEntry(callback, callbackData)
   local r, k = nil, nil
-  local v = -1/0
+  local v = -1 / 0
   for i = 1, self.length do
     local e = self[i]
     local l = callback(e, i, callbackData)
@@ -446,7 +455,7 @@ end
 ---@nodiscard
 function Array:minEntry(callback, callbackData)
   local r, k = nil, nil
-  local v = 1/0
+  local v = 1 / 0
   for i = 1, self.length do
     local e = self[i]
     local l = callback(e, i, callbackData)
@@ -655,10 +664,10 @@ function Array.range(to, from, step, callback, callbackData, out)
   step = step or 1
   local r = outArray(out)
   local j = 0
-	for i = from, to, step do
+  for i = from, to, step do
     j = j + 1
-		r[j] = callback(i, callbackData)
-	end
+    r[j] = callback(i, callbackData)
+  end
   r.length = j
   return r
 end
@@ -686,8 +695,8 @@ end
 -- Some tests.
 function Array.runTests()
   local function expect(v, t) if v ~= t then error(string.format('expected %s, got %s', t, v)) end end
-  local arr = Array{1, 2, 3, 4}
-  arr:removeIf(function (i) return i % 2 == 0 end)
+  local arr = Array { 1, 2, 3, 4 }
+  arr:removeIf(function(i) return i % 2 == 0 end)
   expect(#arr, 2)
   expect(arr[1], 1)
   expect(arr[2], 3)
@@ -695,70 +704,70 @@ function Array.runTests()
   arr = Array()
   arr:push(1)
   expect(#arr, 1)
-  arr:removeIf(function (i) return i % 2 == 1 end)
+  arr:removeIf(function(i) return i % 2 == 1 end)
   expect(#arr, 0)
 
-  arr = Array{1, 2, 3, 4}:slice(2, 3)
+  arr = Array { 1, 2, 3, 4 }:slice(2, 3)
   expect(#arr, 2)
   expect(arr[1], 2)
   expect(arr[2], 3)
 
-  arr = Array{1, 2, 3, 4}:slice(3, 2, -1)
+  arr = Array { 1, 2, 3, 4 }:slice(3, 2, -1)
   expect(#arr, 2)
   expect(arr[1], 3)
   expect(arr[2], 2)
 
-  arr = Array{1, 2, 3, 4}:slice(3, 2)
+  arr = Array { 1, 2, 3, 4 }:slice(3, 2)
   expect(#arr, 0)
 
   expect(Array.isArray(arr), true)
   expect(Array.isArray({}), false)
 
-  expect(Array{1, 2, 1, 3}:join(), '1,2,1,3')
-  expect(Array{1, 2, 1, 3}:distinct():join(), '1,2,3')
-  expect(Array{1, 2, 1, 3}:distinct(function (i) return i % 2 == 1 end):join(), '1,2')
+  expect(Array { 1, 2, 1, 3 }:join(), '1,2,1,3')
+  expect(Array { 1, 2, 1, 3 }:distinct():join(), '1,2,3')
+  expect(Array { 1, 2, 1, 3 }:distinct(function(i) return i % 2 == 1 end):join(), '1,2')
 
-  arr = Array{1, 2, 1, 3}
+  arr = Array { 1, 2, 1, 3 }
   arr:distinct(nil, nil, arr)
   expect(arr:join('.'), '1.2.3')
 
-  expect(Array{1, 2, 3}:reverse():join(), '3,2,1')
-  expect(Array{1, 2, 3, 4}:reverse():join(), '4,3,2,1')
+  expect(Array { 1, 2, 3 }:reverse():join(), '3,2,1')
+  expect(Array { 1, 2, 3, 4 }:reverse():join(), '4,3,2,1')
 
-  arr = Array{1, 2, 3}
+  arr = Array { 1, 2, 3 }
   arr:reverse(arr)
   expect(arr:join('.'), '3.2.1')
 
-  arr = Array{1, 2, 3, 4}
+  arr = Array { 1, 2, 3, 4 }
   arr:reverse(arr)
   expect(arr:join('.'), '4.3.2.1')
 
-  expect(Array{1, {2, 3}, 4}:flatten():join(), '1,2,3,4')
-  expect(Array{1, Array{2, 3}, 4}:flatten():join(), '1,2,3,4')
-  expect(Array{1, {2, Array{3}}, 4}:flatten():join(), '1,2,[3],4')
-  expect(Array{1, {2, Array{3}}, 4}:flatten(2):join(), '1,2,3,4')
+  expect(Array { 1, { 2, 3 }, 4 }:flatten():join(), '1,2,3,4')
+  expect(Array { 1, Array { 2, 3 }, 4 }:flatten():join(), '1,2,3,4')
+  expect(Array { 1, { 2, Array { 3 } }, 4 }:flatten():join(), '1,2,[3],4')
+  expect(Array { 1, { 2, Array { 3 } }, 4 }:flatten(2):join(), '1,2,3,4')
 
   local l = { 1, 2, 3, length = 4 }
   table.insert(l, 2, 0)
   expect(Array.join(l), '1,0,2,3')
 
-  arr = Array{1, 2, 3, 4}
+  arr = Array { 1, 2, 3, 4 }
   arr:insert(2, 17)
   expect(arr:join(), '1,17,2,3,4')
 
-  expect(Array({1, 2, 3}, function (i) return i * 2 end):join(), '2,4,6')
+  expect(Array({ 1, 2, 3 }, function(i) return i * 2 end):join(), '2,4,6')
 
   -- arr = Array{1, 4, 2}
   -- arr:sort()
   -- expect(arr:join(), '1,2,4')
 
-  arr = Array{1, 4, 2, 3, 1.5}
+  arr = Array { 1, 4, 2, 3, 1.5 }
   arr:pop()
   arr:pop()
   arr:sort()
   expect(arr:join(), '1,2,4')
 
-  arr = Array{1, 4, 2}
+  arr = Array { 1, 4, 2 }
   arr:removeAt(2)
   expect(arr[1], 1)
   expect(arr[2], 2)

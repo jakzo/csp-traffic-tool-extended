@@ -21,12 +21,12 @@ function EditorLane:initialize(p1, p2)
   lastIndex = lastIndex + 1
   self.uniqueID = lastIndex
   if vec3.isvec3(p1) then
-    self.name = 'Lane #'..lastIndex
+    self.name = 'Lane #' .. lastIndex
     self.id = lastIndex
     self.loop = false
     self.role = 3
     self.priorityOffset = 0
-    self.points = Array{ p1, p2 }
+    self.points = Array { p1, p2 }
     self.params = {}
   else
     -- deserialization
@@ -70,9 +70,9 @@ local vecDown = vec3(0, -1, 0)
 ---@return SerializedLane
 function EditorLane:finalize(editor)
   if self.finalized == nil then
-    local baseLane = try(function ()
+    local baseLane = try(function()
       return CubicInterpolatingLane(self.points, self.loop)
-    end, function (err)
+    end, function(err)
       ac.error(string.format('Lane is damaged: %s', self.name))
     end)
     if not baseLane then

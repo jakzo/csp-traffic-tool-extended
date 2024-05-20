@@ -1,22 +1,22 @@
-local TrafficConfig = require('TrafficConfig')
-local TrafficDriver = require('TrafficDriver')
-local TrafficGrid = require('TrafficGrid')
-local TrafficLane = require('TrafficLane')
-local TrafficCarFactory = require('TrafficCarFactory')
-local RaceCarTracker = require('RaceCarTracker')
-local CarsList = require('CarsList')
-local TrafficContext = require('TrafficContext')
-local TrafficCarFullLOD = require('TrafficCarFullLOD')
+local TrafficConfig        = require('TrafficConfig')
+local TrafficDriver        = require('TrafficDriver')
+local TrafficGrid          = require('TrafficGrid')
+local TrafficLane          = require('TrafficLane')
+local TrafficCarFactory    = require('TrafficCarFactory')
+local RaceCarTracker       = require('RaceCarTracker')
+local CarsList             = require('CarsList')
+local TrafficContext       = require('TrafficContext')
+local TrafficCarFullLOD    = require('TrafficCarFullLOD')
 local TrafficCarFakeShadow = require('TrafficCarFakeShadow')
 local Array                = require('Array')
 
-local sim = ac.getSim()
+local sim                  = ac.getSim()
 
 ---@class TrafficSimulation
 ---@field drivers TrafficDriver[]
 ---@field carTrackers RaceCarTracker[]
 ---@field carFactory TrafficCarFactory
-local TrafficSimulation = class('TrafficSimulation')
+local TrafficSimulation    = class('TrafficSimulation')
 
 ---@param data SerializedData
 ---@return TrafficSimulation
@@ -24,9 +24,9 @@ function TrafficSimulation:initialize(data)
   ac.perfBegin('Traffic initialization')
   TrafficContext.drawCallbacks:clear()
   self.drivers = Array()
-  self.carTrackers = Array.range(sim.carsCount, function (i) return RaceCarTracker(i - 1) end)
+  self.carTrackers = Array.range(sim.carsCount, function(i) return RaceCarTracker(i - 1) end)
   self.carFactory = TrafficCarFactory(CarsList)
-  self.lastCameraPos = vec3(1/0)
+  self.lastCameraPos = vec3(1 / 0)
   self.jumpedCounter = 0
   self:rebuildGrid(data)
   ac.perfEnd('Traffic initialization')
@@ -67,7 +67,7 @@ function TrafficSimulation:update(dt)
     self.jumpedCounter = self.jumpedCounter - 1
     TrafficCarFactory.setJumped(true)
     TrafficLane.setJumped(true)
-    self.grid.canFindRandom = 1/0
+    self.grid.canFindRandom = 1 / 0
     for _ = 1, TrafficConfig.runFramesOnJump do
       for i = 1, self.drivers.length do
         if self.drivers[i].guide == nil then
@@ -98,7 +98,7 @@ function TrafficSimulation:update(dt)
   end
   ac.debug('Active drivers', d)
   ac.perfEnd('drivers')
-  
+
   ac.perfBegin('cars')
   self.carFactory:update(dt)
   ac.perfEnd('cars')
@@ -122,27 +122,27 @@ function TrafficSimulation:draw3D(layers, clickToDelete)
     -- TrafficContext.trackerBlocking:updateDebug(mousePoint)
   end
 
-  layers:with('Drivers', function ()
+  layers:with('Drivers', function()
     for i = 1, #self.drivers do
       self.drivers[i]:draw3D(layers)
     end
   end)
 
-  layers:with('Cars', function ()
+  layers:with('Cars', function()
     self.carFactory:draw3D(layers)
   end)
 
-  layers:with('Physics', function ()
+  layers:with('Physics', function()
     local mousePoint = layers:mousePoint()
     local aroundBlocking = TrafficContext.trackerBlocking:count(mousePoint)
     local aroundPhysics = TrafficContext.trackerPhysics:count(mousePoint)
     local aroundBlocking5 = TrafficContext.trackerBlocking:anyCloserThan(mousePoint, 5)
     local aroundPhysics5 = TrafficContext.trackerPhysics:anyCloserThan(mousePoint, 5)
-    render.debugText(mousePoint, 
+    render.debugText(mousePoint,
       string.format('blocking: %d (act5: %s)\nphysics: %d (act5: %s)',
         aroundBlocking, aroundBlocking5 and 'yes' or 'no',
         aroundPhysics, aroundPhysics5 and 'yes' or 'no'),
-      rgbm(3,3,3,1), 0.8, render.FontAlign.Left)
+      rgbm(3, 3, 3, 1), 0.8, render.FontAlign.Left)
 
     local cx = math.floor(mousePoint.x / 15) * 15
     local cz = math.floor(mousePoint.z / 15) * 15

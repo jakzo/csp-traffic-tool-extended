@@ -11,20 +11,25 @@ function TurnBaseTrajectory:initialize(from, fromDir, to, toDir, params)
   self.fromDir = fromDir
   self.toDir = toDir
 end
+
 function TurnBaseTrajectory:__len()
   return self.length
 end
+
 function TurnBaseTrajectory:get(transition)
   local v = vec3()
   self:getInto(v, transition)
   return v
 end
+
 function TurnBaseTrajectory:getInto(v, transition, estimate)
   return self._b:getInto(v, math.saturateN(transition * self._lengthInv))
 end
+
 function TurnBaseTrajectory:getPointRef(transition)
   return self._b:getPointRef(transition * self._lengthInv)
 end
+
 function TurnBaseTrajectory:recycled()
   class.recycle(self._b)
   self._b = nil
@@ -35,7 +40,8 @@ local TurnUTurnTrajectory = class('TurnUTurnTrajectory', TurnBaseTrajectory, cla
 function TurnUTurnTrajectory:initialize(from, fromDir, to, toDir, params)
   local halfwayDistance = to:distance(from)
   local halfwayDir = (to - from):scale(1 / halfwayDistance)
-  local uTurnSize = params.ul and params.ul * halfwayDistance or (halfwayDistance < 5 and 5 or math.min(4, 0.7 * halfwayDistance))
+  local uTurnSize = params.ul and params.ul * halfwayDistance or
+  (halfwayDistance < 5 and 5 or math.min(4, 0.7 * halfwayDistance))
   local halfway = (to + from):scale(0.5):add((fromDir - toDir):scale(uTurnSize))
   local b0 = BezierCurveNormalized(from, fromDir, halfway, halfwayDir, params.cb or 0.5, 0.5)
   local b1 = BezierCurveNormalized(halfway, halfwayDir, to, toDir, 0.5, params.ce or 0.5)
@@ -50,18 +56,21 @@ function TurnUTurnTrajectory:initialize(from, fromDir, to, toDir, params)
   self.fromDir = fromDir
   self.toDir = toDir
 end
+
 function TurnUTurnTrajectory:getInto(v, transition, estimate)
   if transition < self._b0len then
     return self._b0:getInto(v, math.saturateN(transition * self._b0lenInv))
   end
   return self._b1:getInto(v, math.saturateN((transition - self._b0len) * self._b1lenInv))
 end
+
 function TurnUTurnTrajectory:getPointRef(transition)
   if transition < self._b0len then
     return self._b0:getPointRef(transition * self._b0lenInv)
   end
   return self._b1:getPointRef((transition - self._b0len) * self._b1lenInv)
 end
+
 function TurnUTurnTrajectory:recycled()
   class.recycle(self._b0)
   class.recycle(self._b1)

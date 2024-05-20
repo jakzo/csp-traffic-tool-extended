@@ -8,8 +8,8 @@ local AABB = class('AABB')
 ---@return AABB
 function AABB.allocate(min, max)
   return {
-    min = min or vec3.new(1/0),
-    max = max or vec3.new(-1/0),
+    min = min or vec3.new(1 / 0),
+    max = max or vec3.new(-1 / 0),
     center = vec3(),
     radius = 0
   }
@@ -32,8 +32,8 @@ function AABB:initialize(min, max)
 end
 
 function AABB:reset()
-  self.min:set(1/0, 1/0, 1/0)
-  self.max:set(-1/0, -1/0, -1/0)
+  self.min:set(1 / 0, 1 / 0, 1 / 0)
+  self.max:set(-1 / 0, -1 / 0, -1 / 0)
 end
 
 ---@param p vec3|AABB
@@ -62,20 +62,20 @@ end
 ---@param aabb AABB
 function AABB:horizontallyInsersects(aabb)
   return self.max.x > aabb.min.x and self.min.x < aabb.max.x
-   and self.max.z > aabb.min.z and self.min.z < aabb.max.z
+      and self.max.z > aabb.min.z and self.min.z < aabb.max.z
 end
 
 ---@param p vec3
 function AABB:contains(p)
   return p.x > self.min.x and p.x < self.max.x
-    and p.y > self.min.y and p.y < self.max.y
-    and p.z > self.min.z and p.z < self.max.z
+      and p.y > self.min.y and p.y < self.max.y
+      and p.z > self.min.z and p.z < self.max.z
 end
 
 ---@param p vec3
 function AABB:horizontallyContains(p)
   return p.x > self.min.x and p.x < self.max.x
-    and p.z > self.min.z and p.z < self.max.z
+      and p.z > self.min.z and p.z < self.max.z
 end
 
 return class.emmy(AABB, AABB.allocate)

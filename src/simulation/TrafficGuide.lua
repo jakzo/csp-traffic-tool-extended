@@ -37,8 +37,10 @@ end
 function TrafficGuide:detach(reason)
   if reason ~= false and self.driver:getPosRef():closerToThan(ac.getSim().cameraPosition, 200) then
     if not reason then reason = '?' end
-    ac.warn('Early detachment nearby: reason='..tostring(reason)..', lane='..(self._curCursor and self._curCursor.lane.name or '?'))
-    DebugShapes['Early detachment ('..(self._curCursor and self._curCursor.lane.name or '?')..')'] = self.driver:getPosRef():clone()
+    ac.warn('Early detachment nearby: reason=' ..
+    tostring(reason) .. ', lane=' .. (self._curCursor and self._curCursor.lane.name or '?'))
+    DebugShapes['Early detachment (' .. (self._curCursor and self._curCursor.lane.name or '?') .. ')'] = self.driver
+    :getPosRef():clone()
   end
   if self._curManeuver ~= nil then self._curManeuver:detach() end
   if self._curCursor ~= nil then self._curCursor:detach() end
@@ -52,17 +54,16 @@ function TrafficGuide:advance(speedKmh, dt)
   local car = self:getDriver():getCar()
 
   if TrafficConfig.debugSpawnAround then
-    if car and car:distanceToCameraSquared() > 400*400 then return self:detach('Too far') end
+    if car and car:distanceToCameraSquared() > 400 * 400 then return self:detach('Too far') end
   elseif car and car:distanceToCameraSquared() > (car:crashed()
-      and TrafficConfig.despawnCrashedDistance * TrafficConfig.despawnCrashedDistance 
-      or TrafficConfig.despawnDistance * TrafficConfig.despawnDistance) then
+        and TrafficConfig.despawnCrashedDistance * TrafficConfig.despawnCrashedDistance
+        or TrafficConfig.despawnDistance * TrafficConfig.despawnDistance) then
     return self:detach('Too far')
   end
 
   -- First, as we drive towards an intersection, let’s find it if nothing is set yet
   local _curCursor = self._curCursor
   if _curCursor ~= nil then
-
     -- if _curCursor.lane.name == 'Lane #8' then
     --   return self:detach() -- TODO
     -- end
@@ -92,7 +93,8 @@ function TrafficGuide:advance(speedKmh, dt)
       end
 
       local nextLink = self._meta.nextLink
-      self._curManeuver = nextLink.intersection:engage(self, _curCursor.lane, nextLink.from, self._nextLane, self._nextLanePos)
+      self._curManeuver = nextLink.intersection:engage(self, _curCursor.lane, nextLink.from, self._nextLane,
+        self._nextLanePos)
     end
   end
 
@@ -118,11 +120,11 @@ function TrafficGuide:advance(speedKmh, dt)
         _curCursor = self._nextLane:startCursor(self.driver, self._nextLanePos, _tmpVec)
         self._curCursor = _curCursor
       end
-  
+
       self._curManeuver = nil
       self.maneuvering = ManeuverBase.ManeuverNone
       -- self.driver.pauseFor = 5e9
-      
+
       self._swapTimer = -10
     elseif _curCursor ~= nil and self._curManeuver:shouldDetachFromLane() then
       _curCursor:detach()
@@ -190,7 +192,7 @@ function TrafficGuide:distanceToNextCar()
       return 0, nil, DistanceTags.ErrorNoCar
     end
     local bd, bc = TrafficContext.trackerBlocking:findNearest(self.driver.pos, checkBlocking, ownCar)
-    if bc ~= nil and bc:getDirRef():dot(self.driver:getDirRef()) < 0.5 
+    if bc ~= nil and bc:getDirRef():dot(self.driver:getDirRef()) < 0.5
         and tmpVec:set(bc:getPosRef()):sub(self.driver:getPosRef()):normalize():dot(self.driver:getDirRef()) > 0.5 then
       bd = bd - 4
     end

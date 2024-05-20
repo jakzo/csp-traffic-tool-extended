@@ -109,9 +109,7 @@ function FlatPolyShape:collectIntersections(lanePoints, laneLooped, intersection
         error('Failed to find an intersection')
       end
       loopStartIndex, loopStartPos, loopStartSide = i - 1, h, side
-
     elseif c1 ~= c2 then
-
       local h, side = self:intersect(c2 and p1 or p2, c2 and p2 or p1)
       if not h then
         error('Failed to find an intersection')
@@ -123,7 +121,6 @@ function FlatPolyShape:collectIntersections(lanePoints, laneLooped, intersection
         intersectionCallback(startIndex, startPos or vec2(lanePoints[1].x, lanePoints[1].z), startSide, i - 1, h, side)
         startPos = nil
       end
-
     elseif not c1 and not c2 then
       if startPos ~= nil then
         error('Intersections intersect?')
@@ -145,7 +142,8 @@ function FlatPolyShape:collectIntersections(lanePoints, laneLooped, intersection
   if loopStartPos ~= nil then
     intersectionCallback(loopStartIndex, loopStartPos, loopStartSide, startIndex, startPos, startSide)
   elseif startPos ~= nil then
-    intersectionCallback(startIndex, startPos, startSide, size - 1, vec2(lanePoints[size].x, lanePoints[size].z), startSide)
+    intersectionCallback(startIndex, startPos, startSide, size - 1, vec2(lanePoints[size].x, lanePoints[size].z),
+      startSide)
   end
 end
 

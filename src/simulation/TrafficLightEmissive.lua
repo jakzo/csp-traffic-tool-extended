@@ -5,7 +5,7 @@ local TrafficContext = require('TrafficContext')
 local rgbNone = rgb()
 local rgbmNone = rgbm(0, 0, 0, 1)
 
-local EmissivePiece = (function ()
+local EmissivePiece = (function()
   ---@class EmissivePiece : ClassBase
   local EmissivePiece = class('EmissivePiece')
 
@@ -23,17 +23,18 @@ local EmissivePiece = (function ()
         self.ref:ensureUniqueMaterials()
       end
     elseif mode == 2 then
-      self.items = Array(role, function (item) return {pos = vec3.new(item.pos), dir = vec3.new(item.dir), radius = item.radius} end)
-      TrafficContext.drawCallbacks:push(function () self:draw() end)
+      self.items = Array(role,
+        function(item) return { pos = vec3.new(item.pos), dir = vec3.new(item.dir), radius = item.radius } end)
+      TrafficContext.drawCallbacks:push(function() self:draw() end)
     else
-      ac.log('Unknown traffic light mode: '..tostring(mode))
+      ac.log('Unknown traffic light mode: ' .. tostring(mode))
     end
   end
 
   function EmissivePiece:draw()
     if not self.active then return end
     render.setDepthMode(render.DepthMode.Normal)
-    for i = 1, #self.items do      
+    for i = 1, #self.items do
       local item = self.items[i]
       render.circle(item.pos, item.dir, item.radius, self.colorRgbm, rgbmNone)
     end
@@ -71,7 +72,7 @@ function TrafficLightEmissive:initialize(side, params)
     self.yellow = EmissivePiece(2, table.slice(params.virtual.items, 2, nil, 3), rgb(40, 30, 2))
     self.green = EmissivePiece(2, table.slice(params.virtual.items, 3, nil, 3), rgb(2, 40, 2))
   else
-    ac.log('Unknown traffic light mode: '..tostring(params.mode))
+    ac.log('Unknown traffic light mode: ' .. tostring(params.mode))
   end
 
   if params.hide and params.hide.mesh then
@@ -80,16 +81,18 @@ function TrafficLightEmissive:initialize(side, params)
 
   if params.mode == 1 or params.mode == nil then
   elseif params.mode == 2 then
-    self.redPoints = Array(params.roles[1].items, function (item) return {pos = vec3.new(item.pos), dir = vec3.new(item.dir), radius = item.radius} end)
+    self.redPoints = Array(params.roles[1].items,
+      function(item) return { pos = vec3.new(item.pos), dir = vec3.new(item.dir), radius = item.radius } end)
   else
-    ac.log('Unknown traffic light mode: '..tostring(params.mode))
+    ac.log('Unknown traffic light mode: ' .. tostring(params.mode))
   end
 end
 
 function TrafficLightEmissive:update()
   if not self.red then return end
   self.red:set(self.side.tlState == IntersectionLink.StateRed or self.side.tlState == IntersectionLink.StateRedYellow)
-  self.yellow:set(self.side.tlState == IntersectionLink.StateYellow or self.side.tlState == IntersectionLink.StateRedYellow)
+  self.yellow:set(self.side.tlState == IntersectionLink.StateYellow or
+  self.side.tlState == IntersectionLink.StateRedYellow)
   self.green:set(self.side.tlState == IntersectionLink.StateGreen)
 end
 

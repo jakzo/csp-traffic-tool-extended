@@ -12,19 +12,24 @@ local function _sceneReferenceDraw3D()
     if d ~= -1 then
       local point = ray.dir * d + ray.pos
       render.debugCross(point, 0.5)
-      render.debugText(point, 'Mesh: '..mesh:name(1)..'\nMaterial: '..mesh:materialName(1)..'\nPress <Backspace> to cancel selection\nPress <Enter> to skip selection', rgbm.colors.white, 0.9, render.FontAlign.Left)
+      render.debugText(point,
+        'Mesh: ' ..
+        mesh:name(1) ..
+        '\nMaterial: ' ..
+        mesh:materialName(1) .. '\nPress <Backspace> to cancel selection\nPress <Enter> to skip selection',
+        rgbm.colors.white, 0.9, render.FontAlign.Left)
       if ac.getUI().isMouseLeftKeyClicked then
         _sceneReferenceData.newValue = mesh:name(1)
       end
     end
   end
 
-  if ui.keyPressed(ui.Key.Escape) or ui.keyPressed(ui.Key.Backspace) then    
+  if ui.keyPressed(ui.Key.Escape) or ui.keyPressed(ui.Key.Backspace) then
     script.draw3DOverride = nil
     _editedElement = nil
   end
 
-  if ui.keyPressed(ui.Key.Enter) then    
+  if ui.keyPressed(ui.Key.Enter) then
     _sceneReferenceData.skip = true
   end
 end
@@ -64,7 +69,7 @@ function EditorUI.sceneReference(role, switchToNext)
   return changed, switchToNext
 end
 
-local prevValues = ac.storage{ radius = 0.1 }
+local prevValues = ac.storage { radius = 0.1 }
 
 local _sceneTvlData = {
   ---@type EditorTrafficLightProgramDefinition
@@ -107,17 +112,20 @@ local function renderPoints(items, program)
 end
 
 local function _sceneTvlDraw3D()
-  local pos, dir, program, items, radius = _sceneTvlData.pos, _sceneTvlData.dir, _sceneTvlData.program, _sceneTvlData.items, prevValues.radius
+  local pos, dir, program, items, radius = _sceneTvlData.pos, _sceneTvlData.dir, _sceneTvlData.program,
+      _sceneTvlData.items, prevValues.radius
 
-  if not ui.mouseBusy() then 
+  if not ui.mouseBusy() then
     local ray = render.createMouseRay()
     local d = _trackRoot:raycast(ray, _ref, pos, dir)
     if d ~= -1 then
       local next = program.emissives[#items % #program.emissives + 1]
       pos:addScaled(dir, 0.01)
       renderQuad(pos, dir, rgbm.new(next.color, 0.5), radius)
-      render.debugText(pos, string.format('Click to add %s light here\nUse W/S buttons to change radius\nPress <Backspace> to %s\nPress <Enter> to finish positioning', 
-        next.name, #items > 0 and 'remove last item' or 'cancel selection'),
+      render.debugText(pos,
+        string.format(
+          'Click to add %s light here\nUse W/S buttons to change radius\nPress <Backspace> to %s\nPress <Enter> to finish positioning',
+          next.name, #items > 0 and 'remove last item' or 'cancel selection'),
         rgbm.colors.white, 0.9, render.FontAlign.Left)
       if ac.getUI().isMouseLeftKeyClicked then
         table.insert(items, { pos = pos:clone(), dir = dir:clone(), radius = radius })
@@ -153,11 +161,13 @@ local function _sceneTvlDrawPreview()
 end
 
 local function _decodeItems(items)
-  return table.map(table.filter(items or {}, function (item) return item.pos end), function (item) return {pos = vec3.new(item.pos), dir = vec3.new(item.dir), radius = item.radius} end)
+  return table.map(table.filter(items or {}, function(item) return item.pos end),
+    function(item) return { pos = vec3.new(item.pos), dir = vec3.new(item.dir), radius = item.radius } end)
 end
 
 local function _encodeItems(items)
-  return table.map(items or {}, function (item) return {pos = item.pos:table(), dir = item.dir:table(), radius = item.radius} end)
+  return table.map(items or {},
+    function(item) return { pos = item.pos:table(), dir = item.dir:table(), radius = item.radius } end)
 end
 
 ---@param program EditorTrafficLightProgramDefinition
@@ -166,7 +176,7 @@ function EditorUI.trafficVirtualLights(program, data, switchToNext)
 
   local label
   if _editedElement == data then
-    label = string.format('%d point%s', #_sceneTvlData.items, #_sceneTvlData.items == 1 and '' or 's')    
+    label = string.format('%d point%s', #_sceneTvlData.items, #_sceneTvlData.items == 1 and '' or 's')
   elseif data.items and #data.items > 0 then
     label = string.format('%d point%s', #data.items, #data.items == 1 and '' or 's')
   else

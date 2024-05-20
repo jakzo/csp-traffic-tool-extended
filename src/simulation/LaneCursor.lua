@@ -76,7 +76,8 @@ function LaneCursor:syncPos(pos)
   self.point, self.edgePos = self.lane:worldToPointEdgePos(pos)
   if self.point == 0 then
     DebugShapes.pos = pos
-    error('Invalid state: '..tostring(pos) .. ', lane=' .. tostring(self.lane) .. ', car=' .. tostring(self.driver:getCar()))
+    error('Invalid state: ' ..
+    tostring(pos) .. ', lane=' .. tostring(self.lane) .. ', car=' .. tostring(self.driver:getCar()))
   end
 end
 
@@ -86,7 +87,8 @@ function LaneCursor:distanceToNextCar()
     if self.lane.loop then
       local lastCursor = self.lane.orderedCars[self.lane.orderedCars.length]
       if lastCursor.driver ~= self.driver then
-        return self.lane.totalDistance + lastCursor:rearDistance() - self.distance, lastCursor.driver:getCar(), DistanceTags.LaneCursorLoopAround
+        return self.lane.totalDistance + lastCursor:rearDistance() - self.distance, lastCursor.driver:getCar(),
+            DistanceTags.LaneCursorLoopAround
       else
         return 1e9, nil, DistanceTags.LaneCursorEmpty
       end

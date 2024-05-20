@@ -18,8 +18,11 @@ function TrafficGrid:initialize(data)
   if data.lanes == nil then error('data.lanes is not set') end
 
   -- ac.perfBegin('Rebuild grid: lanes')
-  self.lanes = Array(data.lanes, TrafficLane):filter(function (p) return p.size > 0 end)
-  self.lanesMap = self.lanes:reduce({}, function (t, l) t[l.id] = l return t end)
+  self.lanes = Array(data.lanes, TrafficLane):filter(function(p) return p.size > 0 end)
+  self.lanesMap = self.lanes:reduce({}, function(t, l)
+    t[l.id] = l
+    return t
+  end)
   -- ac.perfEnd('Rebuild grid: lanes')
   -- self.lanes = table.map({ lanes[4] }, TrafficLane)
   -- self.lanes = table.map({ lanes[5] }, TrafficLane)
@@ -29,8 +32,8 @@ function TrafficGrid:initialize(data)
   -- ac.perfEnd('Rebuild grid: intersections')
 
   self.areas = Array(data.areas, TrafficArea)
-  self.areas:forEach(function (area)
-    self.lanes:forEach(function (lane) area:process(lane) end)
+  self.areas:forEach(function(area)
+    self.lanes:forEach(function(lane) area:process(lane) end)
   end)
 
   -- ac.perfBegin('Rebuild grid: finalization')
@@ -46,7 +49,7 @@ function TrafficGrid:getLaneByID(id)
 end
 
 function TrafficGrid:randomPath(driver)
-  -- if true then 
+  -- if true then
   --   local p = TrafficPath.createFromPoints(self, table.random({
   --     {80,66,29,68,82},
   --     {81,67,29,68,82},
@@ -75,19 +78,19 @@ function TrafficGrid:update(dt)
 end
 
 function TrafficGrid:draw3D(layers)
-  layers:with('Lanes', true, function ()
+  layers:with('Lanes', true, function()
     for i = 1, #self.lanes do
       self.lanes[i]:draw3D(layers)
     end
   end)
 
-  layers:with('Intersections', function ()
+  layers:with('Intersections', function()
     for i = 1, #self.intersections do
       self.intersections[i]:draw3D(layers)
     end
   end)
 
-  layers:with('Graph', function ()
+  layers:with('Graph', function()
     self.graph:draw3D(layers)
   end)
 end

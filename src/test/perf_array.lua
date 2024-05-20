@@ -11,17 +11,17 @@ end
 --   table.insert(v, { value = i + math.random() * 0.5 })
 -- end
 
-return function ()
+return function()
   collectgarbage()
   math.randomseed(0)
   ac.perfBegin(0)
   local t = 0
-  local f = function (j, _, k) return j > k end
+  local f = function(j, _, k) return j > k end
   for i = 1, 10000 do
     local k = math.random() * 100
     local r = v:findLeftOfIndex(f, k)
     t = t + r
-  end  
+  end
   ac.debug('t', t)
   ac.perfEnd(0)
   generic_utils.runGC()
@@ -34,7 +34,7 @@ end
 --   local t = 0
 --   for i = 1, 1000000 do
 --     t = t + v[i % 1000 + 1].value
---   end  
+--   end
 --   ac.debug('t', t)
 --   ac.perfEnd(0)
 --   generic_utils.runGC()
