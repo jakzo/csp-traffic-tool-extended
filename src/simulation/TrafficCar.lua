@@ -248,7 +248,7 @@ function TrafficCar:setPos(posRef, speedKmh)
 end
 
 function TrafficCar:updateLODs()
-  if self._distanceSquared < 80 ^ 2 ~= (self._fullLOD ~= nil) then
+  if self._distanceSquared < 250 ^ 2 ~= (self._fullLOD ~= nil) then
     if self._fullLOD == nil then
       self._fullLOD = TrafficCarFullLOD.get(self)
     else
