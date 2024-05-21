@@ -1,0 +1,5 @@
+{
+  "Lua.workspace.library": [
+    "../../../internal/lua-sdk/ac_tools"
+  ]
+}

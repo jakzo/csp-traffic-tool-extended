@@ -1,5 +1,6 @@
 local TrafficContext = require('TrafficContext')
 local CarBase = require('CarBase')
+local PlayerInteraction = require('PlayerInteraction')
 
 ---@class RaceCarTracker : CarBase
 local RaceCarTracker = class('RaceCarTracker', CarBase)
@@ -14,6 +15,7 @@ function RaceCarTracker:initialize(index)
   self.car = ac.getCar(index)
   self.trackerPhysics = TrafficContext.trackerPhysics:track(self)
   self.trackerBlocking = TrafficContext.trackerBlocking:track(self)
+  self.playerInteraction = PlayerInteraction(self)
   CarBase.initialize(self, self.car.transform, self.car.aabbSize.z / 2, self.car.aabbSize.x / 2)
 end
 
